@@ -17,16 +17,19 @@ The general principles of the cvBMS unit are as follows:
   where S is the number of subsets into which the data are partitioned.
 - Generally, this module applies mass-univariate analysis, i.e. columns of
   the data matrix are treated as different measurements which are analyzed
-  separately, but using the same model.
+  separately, but using the same model. (An exception to this is the multi-
+  variate general linear model (MGLM) in which the whole data matrix belongs
+  to one single model.)
 
 So far, the following model structures are available:
 - MS    = model space; for general model selection operations
 - GLM   = univariate general linear model; for linear regression
+- MGLM  = multivariate general linear model; for multivariate regression
 - Poiss = Poisson distribution with exposures; for count data
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 21/02/2019, 14:50
+Edited: 31/03/2022, 14:54
 """
 
 
@@ -302,14 +305,14 @@ class GLM:
         """
         
         # determine data partition
-        npS  = np.int(self.n/S);# number of data points per subset, truncated
+        npS  = np.int(self.n/S) # number of data points per subset, truncated
         inds = range(S*npS)     # indices for all data, without remainders
         
         # set non-informative priors
         m0_ni = np.zeros((self.p,1))        # flat Gaussian
         L0_ni = np.zeros((self.p,self.p))
-        a0_ni = 0;                          # Jeffrey's prior
-        b0_ni = 0;
+        a0_ni = 0                           # Jeffrey's prior
+        b0_ni = 0
         
         # calculate out-of-sample log model evidences
         #---------------------------------------------------------------------#
@@ -342,6 +345,185 @@ class GLM:
         return cvLME
     
     
+###############################################################################
+# class: multivariate general linear model                                      #
+###############################################################################
+class MGLM:
+    """
+    The MGLM class allows to specify, estimate and assess multivariate general
+    linear models a.k.a. multivariate regression which is defined by an n x 1
+    data vector y, an n x p design matrix X and an n x n covariance matrix V.
+    
+    Edited: 31/03/2022, 14:51
+    """
+    
+    # initialize MGLM
+    #-------------------------------------------------------------------------#
+    def __init__(self, Y, X, V=None):
+        """
+        Initialize a Multivariate General Linear Model
+        mglm = cvBMS.MGLM(Y, X, V)
+            Y    - an n x v data matrix of measured signals
+            X    - an n x p design matrix of predictor variables
+            V    - an n x n covariance matrix specifying correlations (default: I_n)
+            mglm - an MGLM object
+            o Y  - the n x v data matrix
+            o X  - the n x p design matrix
+            o V  - the n x n covariance matrix
+            o n  - the number of observations
+            o v  - the number of instances
+            o p  - the number of regressors
+        """
+        self.Y = Y                          # data matrix
+        self.X = X                          # design matrix
+        if V is None: V = np.eye(Y.shape[0])# covariance matrix
+        self.V = V                          # covariance matrix
+        self.P = np.linalg.inv(V)           # precision matrix
+        self.n = Y.shape[0]                 # number of observations
+        self.v = Y.shape[1]                 # number of instances
+        self.p = X.shape[1]                 # number of regressors
+        
+    # function: ordinary least squares
+    #-------------------------------------------------------------------------#
+    def OLS(self):
+        """
+        Ordinary Least Squares for Multivariate General Linear Model
+        B_est = mglm.OLS()
+            B_est - a p x v matrix of estimated regression coefficients
+        """
+        B_est = np.linalg.inv(self.X.T @ self.X) @ (self.X.T @ self.Y)
+        return B_est
+    
+    # function: weighted least squares
+    #-------------------------------------------------------------------------#
+    def WLS(self):
+        """
+        Weighted Least Squares for Multivariate General Linear Model
+        B_est = glm.WLS()
+            B_est - a p x v matrix of estimated regression coefficients
+        """
+        B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
+        B_est = B_cov @ (self.X.T @ self.P @ self.Y)
+        return B_est
+    
+    # function: maximum likelihood estimation
+    #-------------------------------------------------------------------------#
+    def MLE(self):
+        """
+        Maximum Likelihood Estimation for Multivariate General Linear Model
+        (B_est, S_est) = glm.MLE()
+            B_est - a p x v matrix of estimated regression coefficients
+            S_est - a v x v vector of estimated covariance matrix
+        """
+        B_est = self.WLS()
+        E_est = self.Y - (self.X @ B_est)
+        S_est = 1/self.n * (E_est.T @ self.P @ E_est)
+        return B_est, S_est
+    
+    # function: Bayesian estimation
+    #-------------------------------------------------------------------------#
+    def Bayes(self, M0, L0, O0, v0):
+        """
+        Bayesian Estimation of Multivariate General Linear Model with Normal-Wishart Priors
+        (Mn, Ln, On, vn) = mglm.Bayes(M0, L0, O0, v0)
+            M0 - a p x v vector (prior means of regression coefficients)
+            L0 - a p x p matrix (prior precision of regression coefficients)
+            O0 - a v x v matrix (prior inverse scale matrix for covariance)
+            v0 - a 1 x 1 scalar (prior degrees of freedom for covariance)
+            Mn - a p x v vector (posterior means of regression coefficients)
+            Ln - a p x p matrix (posterior precision of regression coefficients)
+            On - a v x v matrix (posterior inverse scale matrix for covariance)
+            vn - a 1 x 1 scalar (posterior degrees of freedom for covariance)
+        """
+        
+        # enlarge priors if required
+        if M0.shape[1] == 1:
+            M0 = np.tile(M0, (1, self.v))
+        
+        # estimate posterior parameters
+        Ln = self.X.T @ self.P @ self.X + L0
+        Mn = np.linalg.inv(Ln) @ ( self.X.T @ self.P @ self.Y + L0 @ M0 )
+        vn = v0 + self.n
+        On = O0 + self.Y.T @ self.P @ self.Y + M0.T @ L0 @ M0 - Mn.T @ Ln @ Mn
+        
+        # return posterior parameters
+        return Mn, Ln, On, vn
+    
+    # function: log model evidence
+    #-------------------------------------------------------------------------#
+    def LME(self, L0, O0, v0, Ln, On, vn):
+        """
+        Log Model Evidence of Multivariate General Linear Model with Normal-Wishart Priors
+        LME = mglm.LME(L0, O0, v0, Ln, On, vn)
+            L0  - a p x p matrix (prior precision of regression coefficients)
+            O0  - a v x v matrix (prior inverse scale matrix for covariance)
+            v0  - a 1 x 1 scalar (prior degrees of freedom for covariance)
+            Ln  - a p x p matrix (posterior precision of regression coefficients)
+            On  - a v x v matrix (posterior inverse scale matrix for covariance)
+            vn  - a 1 x 1 scalar (posterior degrees of freedom for covariance)
+            LME - a 1 x 1 scalar, the log model evidence
+        """
+        
+        # calculate log model evidence
+        LME = self.v/2 * np.log(np.linalg.det(self.P)) - (self.n*self.v)/2 * np.log(2*np.pi)      \
+            + self.v/2 * np.log(np.linalg.det(L0))     - self.v/2 * np.log(np.linalg.det(Ln)) \
+            + v0/2 * np.log(np.linalg.det(1/2*O0))     - vn/2 * np.log(np.linalg.det(1/2*On)) \
+            + sp_special.multigammaln(vn/2,self.v)     - sp_special.multigammaln(v0/2,self.v)
+        
+        # return log model evidence
+        return LME
+    
+    # function: cross-validated log model evidence
+    #-------------------------------------------------------------------------#
+    def cvLME(self, S=2):
+        """
+        Cross-Validated Log Model Evidence for Multivariate General Linear Model
+        cvLME = mglm.cvLME(S)
+            S     - the number of subsets into which data are partitioned (default: 2)
+            cvLME - a 1 x 1 scalar, the cross-validated log model evidence
+        """
+        
+        # determine data partition
+        npS  = np.int(self.n/S) # number of data points per subset, truncated
+        inds = range(S*npS)     # indices for all data, without remainders
+        
+        # set non-informative priors
+        M0_ni = np.zeros((self.p,self.v))   # flat Gaussian
+        L0_ni = np.zeros((self.p,self.p))
+        O0_ni = np.zeros((self.p,self.p))   # non-informative Wishart
+        v0_ni = 0
+        
+        # calculate out-of-sample log model evidences
+        #---------------------------------------------------------------------#
+        oosLME = np.zeros((S,1))
+        for j in range(S):
+            
+            # set indices
+            i2 = range(j*npS, (j+1)*npS)                # test indices
+            i1 = [i for i in inds if i not in i2]       # training indices
+            
+            # partition data
+            Y1 = self.Y[i1,:]                           # training data
+            X1 = self.X[i1,:]
+            P1 = self.P[i1,:][:,i1]
+            S1 = MGLM(Y1, X1, P1)
+            Y2 = self.Y[i2,:]                           # test data
+            X2 = self.X[i2,:]
+            P2 = self.P[i2,:][:,i2]
+            S2 = MGLM(Y2, X2, P2)
+            
+            # calculate oosLME
+            M01 = M0_ni; L01 = L0_ni; O01 = O0_ni; v01 = v0_ni;
+            Mn1, Ln1, On1, vn1 = S1.Bayes(M01, L01, O01, v01)
+            M02 = Mn1; L02 = Ln1; O02 = On1; v02 = vn1;
+            Mn2, Ln2, On2, vn2 = S2.Bayes(M02, L02, O02, v02)
+            oosLME[j] = S2.LME(L02, O02, v02, Ln2, On2, vn2)
+            
+        # return cross-validated log model evidence
+        cvLME = np.sum(oosLME)
+        return cvLME
+
+
 ###############################################################################
 # class: Poisson distribution                                                 #
 ###############################################################################
