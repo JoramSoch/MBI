@@ -31,14 +31,16 @@ Let `Y` be an entire feature matrix and let `x` be an entire vector of class lab
 
 ```matlab
 % cross-validated MBC
-CV  = ML_CV(x, k, 'kfc');
+CV  = ML_CV(x, k, 'kfc');                  % k-folds on points per class
 MBC = ML_MBI(Y, x, [], [], CV, 'MBC', []);
+DA  = MBC.perf.DA;                         % decoding accuracy
 ```
 
 ```matlab
 % cross-validated MBR
-CV  = ML_CV(numel(x), k, 'kf');
+CV  = ML_CV(numel(x), k, 'kf');            % k-folds cross-validation
 MBR = ML_MBI(Y, x, [], [], CV, 'MBR', []);
+r   = MBR.perf.r;                          % predictive correlation
 ```
 
 For extra input parameters of `ML_MBI.m` and fields of the output structure `MBC`/`MBR`, type `help ML_MBI` into the command window. For manipulating the prior probabilities for prediction in the test data, type `help mbitest`.
