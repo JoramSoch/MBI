@@ -7,7 +7,7 @@ estimation of multivariate general linear models (MGLM).
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 04/04/2022, 16:09
+Edited: 12/04/2022, 19:48
 """
 
 
@@ -17,10 +17,69 @@ import cvBMS
 import numpy as np
 
 
+# function: matrix-normal random numbers
+#-----------------------------------------------------------------------------#
+def matnrnd(M, U, V, c=1, A=None, B=None):
+    """
+    Random Matrices from the Matrix-Variate Normal Distribution
+    """
+    
+    # set default values
+    if c is None:
+        c = 1
+    if A is None:
+        A = np.linalg.cholesky(U)
+    if B is None:
+        B = np.linalg.cholesky(V).T
+    # Note: Python's numpy.linalg.cholesky seems to return the transpose
+    # relative to MATLAB's chol. This is why transposition in this Python
+    # code is reversed in comparison with the MATLAB implementation:
+    #   matnrnd.m           MBI.matnrnd
+    #   ---------           -----------
+    #   A = chol(U)';       A = np.linalg.cholesky(U)
+    #   B = chol(V);        B = np.linalg.cholesky(V).T
+    
+    # sample from standard normal distribution
+    R = np.random.standard_normal(size=(U.shape[0], V.shape[0], c))
+    
+    # transform into matrix normal distribution
+    for i in range(c):
+        R[:,:,i] = M + A @ R[:,:,i] @ B
+    
+    # return random matrix
+    return R
+
+# function: uniform prior distribution
+#-----------------------------------------------------------------------------#
+def uniprior(x_type='disc', L=100, x_min=0, x_max=1):
+    """
+    Mass or Density Function for a Uniform Prior Distribution
+    """
+    
+    # discrete random variable (classes)
+    if x_type == 'disc':
+        C = int(L)
+        prior = {
+            "x": np.arange(0,C) + 1,
+            "p": (1/C) * np.ones(C)
+        }
+    
+    # continuous random variable (targets)
+    if x_type == 'cont':
+        if L is None: L = 100
+        prior = {
+            "x": np.linspace(x_min, x_max, L),
+            "p": (1/(x_max-x_min)) * np.ones(L)
+        }
+    
+    # return uniform prior
+    return prior
+
+
 ###############################################################################
 # class: multivariate general linear model                                    #
 ###############################################################################
-class model:
+class model(cvBMS.MGLM):
     """
     Multivariate General Linear Model for MBI prediction
     """
@@ -34,19 +93,20 @@ class model:
         
         # create design matrix
         if mb_type == 'MBC':                # classification
+            n  = Y.shape[0]
             C  = int(np.max(x))
-            Xx = np.zeros((Y.shape[0],C))
-            for j in range(C):
-                Xx[x==C,j+1] = 1
+            Xx = np.zeros((n,C))
+            for i in range(n):
+                Xx[i,int(x[i]-1)] = 1
         elif mb_type == 'MBR':              # regression
             Xx = np.hstack((x, np.ones((Y.shape[0],1))))
         if X is None: X = np.zeros((Y.shape[0],0))
         if V is None: V = np.eye(Y.shape[0])
         
         # store model information
-        X         = np.hstack((Xx, X))      # enhanced design matrix
-        self      = cvBMS.MGLM(Y, X, V)     # multivariate GLM object
-        self.x    = x
+        X      = np.hstack((Xx, X))      # enhanced design matrix
+        super().__init__(Y, X, V)
+        self.x = x
         if mb_type == 'MBC':
             self.is_MBC = True
         elif mb_type == 'MBR':
@@ -87,13 +147,9 @@ class model:
         # set prior if required
         if prior is None:
             if self.is_MBC:
-                C = int(np.max(MBA['input']['x']))
-                prior.x = np.arange(0,C) + 1
-                prior.p = (1/C) * np.ones(C)
+                prior = uniprior('disc', int(np.max(MBA['input']['x'])))
             else:
-                L = 100
-                prior.x = np.linspace(np.min(MBA['input']['x']), np.max(MBA['input']['x']), L)
-                prior.p = (1/(np.max(MBA['input']['x'])-np.min(MBA['input']['x']))) * np.ones(L)
+                prior = uniprior('cont', 100, np.min(MBA['input']['x']), np.max(MBA['input']['x']))
         
         # specify prior parameters
         M1 = MBA['post']['M1']
@@ -102,30 +158,30 @@ class model:
         v1 = MBA['post']['v1']
         
         # calculate posterior probabilities
-        L     = prior.x.size
-        PP    = np.zeros(self.n,L)
-        logPP = np.zeros(self.n,L)
+        L     = prior['x'].size
+        PP    = np.zeros((self.n,L))
+        logPP = np.zeros((self.n,L))
         for i in range(self.n):
-            y2i = self.Y[i,:]
-            x2i = self.X[i,:]
-            vii = self.V[i,i]
+            y2i = np.array([ self.Y[i,:] ])
+            x2i = np.array([ self.X[i,:] ])
+            vii = np.array([[self.V[i,i]]])
             for j in range(L):
                 x2ij = x2i
                 if self.is_MBC:
                     x2ij[0,:L] = 0
-                    x2ij[j]    = 1
+                    x2ij[0,j]  = 1
                 else:
-                    x2ij[1]    = prior.x[j]
+                    x2ij[0,0]  = prior['x'][j]
                 mij            = cvBMS.MGLM(y2i, x2ij, vii)
                 M2, L2, O2, v2 = mij.Bayes(M1, L1, O1, v1)
                 logPP[i,j] = -self.v/2 * np.log(np.linalg.det(L2)) \
                            -      v2/2 * np.log(np.linalg.det(O2)) \
-                           +             np.log(prior.p[j])
+                           +             np.log(prior['p'][j])
             PP[i,:] = np.exp(logPP[i,:] - np.mean(logPP[i,:]))
             if self.is_MBC:
                 PP[i,:] = (1/np.sum(PP[i,:])) * PP[i,:]
             else:
-                PP[i,:] = (1/np.trapz(prior.x, PP[i,:])) * PP[i,:]
+                PP[i,:] = (1/np.trapz(prior['x'], PP[i,:])) * PP[i,:]
         return PP
 
 
@@ -179,11 +235,12 @@ class cvMBI:
         
         # get class indices
         n  = c.size
-        C  = np.max(c)
+        C  = int(np.max(c))
         ic = [None] * C
         nc = np.zeros(C)
         for j in range(C):
             ic[j] = np.nonzero(c==j+1)
+            ic[j] = np.array(ic[j][0], dtype=int)
             nc[j] = c[ic[j]].size
         CV = np.zeros((n,k))
         
@@ -192,7 +249,7 @@ class cvMBI:
             nf = np.ceil(n/k)
             ia = np.arange(0,n)
             for g in range(k):
-                i2 = np.arange(g*nf, np.min((g+1)*nf, n))
+                i2 = np.arange(g*nf, np.min([(g+1)*nf, n]), dtype=int)
                 i1 = [i for i in ia if i not in i2]
                 CV[i1,g] = 1
                 CV[i2,g] = 2
@@ -201,13 +258,14 @@ class cvMBI:
         if cv_mode == 'kfc' or cv_mode == 'looc':
             nf = np.ceil(nc/k)
             ia = np.arange(0,n)
-            for g in range (k):
-                i2 = np.empty(1)
+            for g in range(k):
+                i2 = np.empty(1, dtype=int)
                 for j in range(C):
-                    i2.append(ic[j][np.arange(g*nf[j], np.min((g+1)*nf[j], nc[j]))])
+                    ij = np.arange(g*nf[j], np.min([(g+1)*nf[j], nc[j]]), dtype=int)
+                    i2 = np.append(i2, ic[j][ij])
                 i1 = [i for i in ia if i not in i2]
-            CV[i1,g] = 1
-            CV[i2,g] = 2
+                CV[i1,g] = 1
+                CV[i2,g] = 2
         
         # store CV information
         self.CV = CV
@@ -227,17 +285,13 @@ class cvMBI:
         # set prior if required
         if prior is None:
             if self.is_MBC:
-                C = int(np.max(self.x))
-                prior.x = np.arange(0,C) + 1
-                prior.p = (1/C) * np.ones(C)
+                prior = uniprior('disc', int(np.max(self.x)))
             else:
-                L = 100
-                prior.x = np.linspace(np.min(self.x), np.max(self.x), L)
-                prior.p = (1/(np.max(self.x)-np.min(self.x))) * np.ones(L)
+                prior = uniprior('cont', 100, np.min(self.x), np.max(self.x))
         self.prior = prior
         
         # cross-validated analysis
-        L  = prior.x.size                   # classes/levels
+        L  = prior['x'].size                   # classes/levels
         xt = np.zeros(self.n)               # "true" classes
         xp = np.zeros(self.n)               # predicted classes
         PP = np.zeros((self.n,L))           # posterior probabilities
@@ -246,11 +300,13 @@ class cvMBI:
             # get test and training set
             i1 = np.nonzero(self.CV[:,g]==1)
             i2 = np.nonzero(self.CV[:,g]==2)
+            i1 = np.array(i1[0], dtype=int)
+            i2 = np.array(i2[0], dtype=int)
             Y1 = self.Y[i1,:]
             Y2 = self.Y[i2,:]
             x1 = self.x[i1]
             x2 = self.x[i2]
-            if self.X.shape[2] > 0:
+            if self.X.shape[1] > 0:
                 X1 = self.X[i1,:]
                 X2 = self.X[i2,:]
             else:
@@ -269,9 +325,9 @@ class cvMBI:
             PP[i2,:] = PP2
             
             # collect true and predicted
-            for i in range(i2):
+            for i in range(i2.size):
                 xt[i2[i]] = x2[i]
-                xp[i2[i]] = prior.x[PP[i2[i]]==np.max(PP[i2[i]])]
+                xp[i2[i]] = prior['x'][PP[i2[i],:]==np.max(PP[i2[i],:])]
         
         # store prediction results
         self.xt = xt
