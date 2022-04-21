@@ -490,7 +490,7 @@ class MGLM:
         # set non-informative priors
         M0_ni = np.zeros((self.p,self.v))   # flat Gaussian
         L0_ni = np.zeros((self.p,self.p))
-        O0_ni = np.zeros((self.p,self.p))   # non-informative Wishart
+        O0_ni = np.zeros((self.v,self.v))   # non-informative Wishart
         v0_ni = 0
         
         # calculate out-of-sample log model evidences

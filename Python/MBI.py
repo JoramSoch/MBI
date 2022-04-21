@@ -99,19 +99,16 @@ class model(cvBMS.MGLM):
             for i in range(n):
                 Xx[i,int(x[i]-1)] = 1
         elif mb_type == 'MBR':              # regression
-            Xx = np.hstack((x, np.ones((Y.shape[0],1))))
+            Xx = np.c_[x, np.ones((Y.shape[0],1))]
         if X is None: X = np.zeros((Y.shape[0],0))
         if V is None: V = np.eye(Y.shape[0])
         
         # store model information
-        X      = np.hstack((Xx, X))      # enhanced design matrix
-        super().__init__(Y, X, V)
-        self.x = x
-        if mb_type == 'MBC':
-            self.is_MBC = True
-        elif mb_type == 'MBR':
-            self.is_MBC = False
-
+        X = np.c_[Xx, X]                    # enhanced design matrix
+        super().__init__(Y, X, V)           # inherit parent class
+        self.x      = x
+        self.is_MBC =(mb_type == 'MBC')
+    
     # function: training for MBI
     #-------------------------------------------------------------------------#
     def train(self):
@@ -122,7 +119,7 @@ class model(cvBMS.MGLM):
         # specify prior parameters
         M0 = np.zeros((self.p,self.v))
         L0 = np.zeros((self.p,self.p))
-        O0 = np.zeros((self.p,self.p))
+        O0 = np.zeros((self.v,self.v))
         v0 = 0
         
         # calculate posterior parameters
@@ -130,7 +127,7 @@ class model(cvBMS.MGLM):
         
         # assemble MBA dictionary
         MBA = {
-            "input": {"x": self.x},
+            "input": {"x" : self.x},
             "data" : {"Y1": self.Y, "X1": self.X, "V1": self.V},
             "prior": {"M0": M0, "L0": L0, "O0": O0, "v0": v0},
             "post" : {"M1": M1, "L1": L1, "O1": O1, "v1": v1}
@@ -291,13 +288,13 @@ class cvMBI:
         self.prior = prior
         
         # cross-validated analysis
-        L  = prior['x'].size                   # classes/levels
+        L  = prior['x'].size                # classes/levels
         xt = np.zeros(self.n)               # "true" classes
         xp = np.zeros(self.n)               # predicted classes
         PP = np.zeros((self.n,L))           # posterior probabilities
         for g in range(k):
             
-            # get test and training set
+            # get training and test set
             i1 = np.nonzero(self.CV[:,g]==1)
             i2 = np.nonzero(self.CV[:,g]==2)
             i1 = np.array(i1[0], dtype=int)
@@ -347,11 +344,19 @@ class cvMBI:
             if self.is_MBC: meas = 'r'
         
         # calculate performance
-        if meas == 'DA':                    # classification
+        if meas == 'DA':                    # decoding accuracy
             perf = np.mean(self.xp==self.xt)
-        if meas == 'r':                     # regression
-            R    = np.corrcoef(self.xp, self.xt)
-            perf = R[0,1]
+        if meas == 'CA':                    # class accuracies
+            C    = int(np.max(self.xt))
+            perf = np.zeros(C)
+            for j in range(C):
+                perf[j] = np.mean(self.xp[self.xt==(j+1)]==(j+1))
+        if meas == 'BA':                    # balanced accuracy
+            perf = np.mean(self.evaluate('CA'))
+        if meas == 'r':                     # correlation coefficient
+            perf = np.corrcoef(self.xp, self.xt)[0,1]
+        if meas == 'MAE':
+            perf = np.mean(np.absolute(self.xp-self.xt))
         
         # return performance
         return perf
