@@ -50,7 +50,7 @@ For extra input parameters of `ML_MBI.m` and fields of the output structure `MBC
 
 > These tools rely on the [cvLME package](https://github.com/JoramSoch/cvLME) (`cvBMS.py`) which is currently included in the repository.
 
-**Note: Python code has not been tested so far!** For using the Python code, you have to import the MBI module somewhere in your script:
+For using the Python code, you have to import the MBI module somewhere in your script:
 
 ```python
 import MBI
