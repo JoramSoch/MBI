@@ -7,7 +7,7 @@ estimation of multivariate general linear models (MGLM).
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 12/04/2022, 19:48
+Edited: 27/04/2022, 20:22
 """
 
 
@@ -181,7 +181,7 @@ class model(cvBMS.MGLM):
             if self.is_MBC:
                 PP[i,:] = (1/np.sum(PP[i,:])) * PP[i,:]
             else:
-                PP[i,:] = (1/np.trapz(prior['x'], PP[i,:])) * PP[i,:]
+                PP[i,:] = (1/np.trapz(PP[i,:], prior['x'])) * PP[i,:]
         return PP
 
 

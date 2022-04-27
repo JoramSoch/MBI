@@ -29,7 +29,7 @@ So far, the following model structures are available:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 31/03/2022, 14:54
+Edited: 27/04/2022, 13:18
 """
 
 
@@ -169,7 +169,7 @@ class GLM:
     linear models a.k.a. linear regression which is defined by an n x 1 data
     vector y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 01/02/2019, 08:30
+    Edited: 27/04/2022, 13:18
     """
     
     # initialize GLM
@@ -355,7 +355,7 @@ class MGLM:
     linear models a.k.a. multivariate regression which is defined by an n x 1
     data vector y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 31/03/2022, 14:51
+    Edited: 27/04/2022, 13:18
     """
     
     # initialize MGLM
