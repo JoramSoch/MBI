@@ -260,12 +260,13 @@ class GLM:
             b0 = b0 * np.ones(self.v)
         
         # estimate posterior parameters
+        PY = self.P @ self.Y
         Ln = self.X.T @ self.P @ self.X + L0
-        mn = np.linalg.inv(Ln) @ ( self.X.T @ self.P @ self.Y + L0 @ m0 )
+        mn = np.linalg.inv(Ln) @ ( self.X.T @ PY + L0 @ m0 )
         an = a0 + self.n/2
         bn = np.zeros(self.v)
         for j in range(self.v):
-            bn[j] = b0[j] + 1/2 * ( self.Y[:,j].T @ self.P @ self.Y[:,j] + m0[:,j].T @ L0 @ m0[:,j] - mn[:,j].T @ Ln @ mn[:,j] )
+            bn[j] = b0[j] + 1/2 * ( self.Y[:,j].T @ PY[:,j] + m0[:,j].T @ L0 @ m0[:,j] - mn[:,j].T @ Ln @ mn[:,j] )
         
         # return posterior parameters
         return mn, Ln, an, bn
@@ -441,10 +442,11 @@ class MGLM:
             M0 = np.tile(M0, (1, self.v))
         
         # estimate posterior parameters
+        PY = self.P @ self.Y
         Ln = self.X.T @ self.P @ self.X + L0
-        Mn = np.linalg.inv(Ln) @ ( self.X.T @ self.P @ self.Y + L0 @ M0 )
+        Mn = np.linalg.solve(Ln, self.X.T @ PY + L0 @ M0)
         vn = v0 + self.n
-        On = O0 + self.Y.T @ self.P @ self.Y + M0.T @ L0 @ M0 - Mn.T @ Ln @ Mn
+        On = O0 + self.Y.T @ PY + M0.T @ L0 @ M0 - Mn.T @ Ln @ Mn
         
         # return posterior parameters
         return Mn, Ln, On, vn

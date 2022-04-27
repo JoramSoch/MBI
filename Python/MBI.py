@@ -171,9 +171,12 @@ class model(cvBMS.MGLM):
                     x2ij[0,0]  = prior['x'][j]
                 mij            = cvBMS.MGLM(y2i, x2ij, vii)
                 M2, L2, O2, v2 = mij.Bayes(M1, L1, O1, v1)
-                logPP[i,j] = -self.v/2 * np.log(np.linalg.det(L2)) \
-                           -      v2/2 * np.log(np.linalg.det(O2)) \
+                logPP[i,j] = -self.v/2 * np.linalg.slogdet(L2)[1] \
+                           -      v2/2 * np.linalg.slogdet(O2)[1] \
                            +             np.log(prior['p'][j])
+              # logPP[i,j] = -self.v/2 * np.log(np.linalg.det(L2)) \
+              #            -      v2/2 * np.log(np.linalg.det(O2)) \
+              #            +             np.log(prior['p'][j])
             PP[i,:] = np.exp(logPP[i,:] - np.mean(logPP[i,:]))
             if self.is_MBC:
                 PP[i,:] = (1/np.sum(PP[i,:])) * PP[i,:]
