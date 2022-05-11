@@ -1,7 +1,7 @@
 function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % _
 % Cross-Validated Multivariate Bayesian Inversion
-% FORMAT MBI = ML_MBI(Y, x, X, V, CV, prior, type)
+% FORMAT MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % 
 %     Y     - an n x v matrix of feature variables
 %     x     - an n x 1 vector of classes/targets
@@ -13,7 +13,7 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % 
 %     MBI   - a structure specifying the performed MBI (to be documented)
 % 
-% FORMAT MBI = ML_MBI(Y, x, X, V, CV, prior, type) splits measured signals
+% FORMAT MBI = ML_MBI(Y, x, X, V, CV, type, prior) splits measured signals
 % Y, classes/targets x and covariate values X into cross-validation folds
 % according to CV and then performs multivariate Bayesian inversion for
 % classification into categories or regression on targets.
@@ -22,13 +22,13 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % E-Mail: joram.soch@bccn-berlin.de
 % 
 % First edit: 20/02/2022, 10:58
-%  Last edit: 20/02/2022, 10:58
+%  Last edit: 11/05/2022, 09:05
 
 
 % Set inputs if required
 %-------------------------------------------------------------------------%
 if isempty(X)  || nargin < 3, X  = [];                  end;
-if isempty(V)  || nargin < 4, V  = eye(size(numel(x))); end;
+if isempty(V)  || nargin < 4, V  = eye(numel(x));       end;
 if isempty(CV) || nargin < 5, CV = ML_CV(x, 10, 'kfc'); end;
 
 % Set type if required
@@ -203,5 +203,6 @@ elseif strcmp(type,'MBR')
     MBI.perf.R2    = R2;
     MBI.perf.MAE   = MAE;
     MBI.perf.MSE   = MSE;
-    MBI.perf.mn    = mn;
+    MBI.perf.m     = mn(1);
+    MBI.perf.n     = mn(2);
 end;
