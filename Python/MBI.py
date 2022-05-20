@@ -7,7 +7,7 @@ estimation of multivariate general linear models (MGLM).
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 27/04/2022, 20:22
+Edited: 20/05/2022, 12:34
 """
 
 
@@ -219,7 +219,7 @@ class cvMBI:
         
     # function: cross-validation
     #-------------------------------------------------------------------------#
-    def crossval(self, c=None, k=10, cv_mode='kfc'):
+    def crossval(self, c=None, k=10, cv_mode='kfc', cv_mat=None):
         """
         Cross-Validate for Multivariate Bayesian Inversion
         """
@@ -233,16 +233,21 @@ class cvMBI:
             if cv_mode == 'looc': cv_mode = 'loo'
         if cv_mode == 'loo': k = c.size
         
-        # get class indices
-        n  = c.size
-        C  = int(np.max(c))
-        ic = [None] * C
-        nc = np.zeros(C)
-        for j in range(C):
-            ic[j] = np.nonzero(c==j+1)
-            ic[j] = np.array(ic[j][0], dtype=int)
-            nc[j] = c[ic[j]].size
-        CV = np.zeros((n,k))
+        # get CV matrix, if custom CV
+        if cv_mode == 'custom':
+            CV = cv_mat
+            k  = CV.shape[1]
+        # get class indices, otherwise
+        else:
+            n  = c.size
+            C  = int(np.max(c))
+            ic = [None] * C
+            nc = np.zeros(C)
+            for j in range(C):
+                ic[j] = np.nonzero(c==j+1)
+                ic[j] = np.array(ic[j][0], dtype=int)
+                nc[j] = c[ic[j]].size
+            CV = np.zeros((n,k))
         
         # k-folds and leave-one-out cross-validation
         if cv_mode == 'kf' or cv_mode == 'loo':
@@ -344,7 +349,7 @@ class cvMBI:
         # set measure if required
         if meas is None:
             if self.is_MBC: meas = 'DA'
-            if self.is_MBC: meas = 'r'
+            else:           meas = 'r'
         
         # calculate performance
         if meas == 'DA':                    # decoding accuracy
@@ -358,7 +363,7 @@ class cvMBI:
             perf = np.mean(self.evaluate('CA'))
         if meas == 'r':                     # correlation coefficient
             perf = np.corrcoef(self.xp, self.xt)[0,1]
-        if meas == 'MAE':
+        if meas == 'MAE':                   # mean absolute error
             perf = np.mean(np.absolute(self.xp-self.xt))
         
         # return performance
