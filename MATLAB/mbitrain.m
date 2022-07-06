@@ -33,9 +33,7 @@ function MBA = mbitrain(Y, x, X, V, type)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% 
-% First edit: 20/02/2022, 08:50
-%  Last edit: 20/02/2022, 08:50
+% Edited: 20/02/2022, 08:50
 
 
 % Set inputs if required

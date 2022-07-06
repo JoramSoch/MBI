@@ -24,9 +24,7 @@ function R = matnrnd(M,U,V,c,A,B)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% 
-% First edit: 07/03/2018, 08:55
-%  Last edit: 06/03/2020, 15:23
+% Edited: 06/03/2020, 15:23
 
 
 % Set number of cases if necessary

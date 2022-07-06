@@ -7,11 +7,39 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 %     x     - an n x 1 vector of classes/targets
 %     X     - an n x r matrix of covariate values
 %     V     - an n x n matrix, the covariance between observations
-%     CV    - an n x k matrix, specifying the cross-validation folds
+%     CV    - an n x k matrix, specifying cross-validation (see "ML_CV")
 %     type  - a string indicating the analysis type ('MBC' or 'MBR')
 %     prior - a structure specifying the prior distribution (see "mbitest")
 % 
-%     MBI   - a structure specifying the performed MBI (to be documented)
+%     MBI   - a structure specifying the performed MBI
+%             o data - the data for the MBI (Y, x, X, V)
+%                      o C     - the number of classes (=max(x))
+%                      o N     - a  1 x C vector, number of points per class
+%             o pars - parameters of the MBI
+%                      o CV    - an n x k matrix of cross-validation folds
+%                      o prior - a structure specifying the prior distribution 
+%             o pred - predictions of the MBI
+%                      o PP    - an n x L matrix of posterior probabilities
+%                      o xt    - an n x 1 vector of maximum-a-posteriori estimates
+%                      o xp    - an n x 1 vector of true class indices or target values
+%             o perf - predictive performance of the MBI
+%                    - in case of classification (MBC)
+%                      o DA    - a scalar, the decoding accuracy
+%                      o BA    - a scalar, the balanced accuracy
+%                      o CA    - a C x 1 vector of class accuracies
+%                      o DA_CI - a 1 x 2 vector with 90% confidence interval for DA
+%                      o BA_CI - a 1 x 2 vector with 90% confidence interval for BA
+%                      o CA_CI - a C x 2 matrix of 90% confidence intervals for CA
+%                      o CM    - a C x C matrix of conditional probabilities
+%                    - in case of regression (MBR)
+%                      o r     - a scalar, the correlation coefficient
+%                      o r_p   - a scalar, the correlation p-value
+%                      o r_CI  - a 1 x 2 vector with 90% confidence interval for r
+%                      o R2    - a scalar, the coefficient of determination (=r^2, "R-squared")
+%                      o MAE   - a scalar, the mean absolulte error
+%                      o MSE   - a scalar, the mean squared error
+%                      o m     - a scalar, slope of the line going through points (xt,xp)
+%                      o n     - a scalar, intercept of the line going through points (xt,xp)
 % 
 % FORMAT MBI = ML_MBI(Y, x, X, V, CV, type, prior) splits measured signals
 % Y, classes/targets x and covariate values X into cross-validation folds
@@ -20,9 +48,7 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% 
-% First edit: 20/02/2022, 10:58
-%  Last edit: 11/05/2022, 09:05
+% Edited: 06/07/2022, 15:56
 
 
 % Set inputs if required

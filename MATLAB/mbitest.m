@@ -9,8 +9,8 @@ function PP = mbitest(Y, x, X, V, MBA, prior)
 %     V     - an n x n matrix, the covariance between observations
 %     MBA   - a structure specifying a trained MBI model (see "mbitrain")
 %     prior - a structure specifying the prior model probabilities
-%             o x - an 1 x L vector, the support of the prior distribution
-%             o p - an 1 x L vector, the prior probability mass or density
+%             o x - a 1 x L vector, the support of the prior distribution
+%             o p - a 1 x L vector, the prior probability mass or density
 %              (L - number of classes or number of target variable levels)
 % 
 %     PP    - an n x L matrix of posterior probabilities
@@ -21,9 +21,7 @@ function PP = mbitest(Y, x, X, V, MBA, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% 
-% First edit: 20/02/2022, 09:28
-%  Last edit: 20/02/2022, 11:16
+% Edited: 06/07/2022, 15:29
 
 
 % Set inputs if required
@@ -100,3 +98,30 @@ for i = 1:n                     % loop over test data points
     end;
     clear y2i x2i pii x2ij
 end;
+
+
+% Function: compute log-determinant
+%-------------------------------------------------------------------------%
+function ld = logdet(V)
+% _
+% Log-Determinant for Covariance Matrix
+% FORMAT ld = logdet(V)
+% 
+%     V  - an n x n positive-definite symmetric covariance matrix
+% 
+%     ld - the log-determinant of that covariance matrix
+% 
+% FORMAT LD = logdet(V) computes the logarithm of the determinant of the
+% matrix V where V is an n x n square matrix [1]. If V is singular, such
+% that det(V) = 0, then it returns -Inf.
+% 
+% This function computes the log-determinant using Cholesky factorization,
+% thus assuming that V is a (positive-definite symmetric) covariance matrix.
+% 
+% References:
+% [1] Lin D (2008). Safe computation of logarithm-determinat of large matrix;
+%     URL: http://www.mathworks.com/matlabcentral/fileexchange/22026-safe-
+%     computation-of-logarithm-determinat-of-large-matrix/content/logdet.m
+
+% compute log-determinant
+ld = 2 * sum(log(diag(chol(V))));

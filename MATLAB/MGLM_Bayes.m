@@ -8,18 +8,18 @@ function [Mn, Ln, On, vn] = MGLM_Bayes(Y, X, P, M0, L0, O0, v0)
 %     P  - an n x n precision matrix specifying correlations
 %     M0 - a  p x v matrix (prior means of regression coefficients)
 %     L0 - a  p x p matrix (prior precision of regression coefficients)
-%     P0 - a  v x v sparse (prior inverse scale matrix for covariance)
+%     O0 - a  v x v matrix (prior inverse scale matrix for covariance)
 %     v0 - a  1 x 1 scalar (prior degrees of freedom for covariance)
 % 
 %     Mn - a  p x v matrix (posterior means of regression coefficients)
 %     Ln - a  p x p matrix (posterior precision of regression coefficients)
-%     On - a  v x v sparse (posterior inverse scale matrix for covariance)
+%     On - a  v x v matrix (posterior inverse scale matrix for covariance)
 %     vn - a  1 x 1 scalar (posterior degrees of freedom for covariance)
 % 
 % FORMAT [Mn, Ln, On, vn] = MGLM_Bayes(Y, X, P, M0, L0, O0, v0) returns
 % the posterior parameter estimates for a multivariate general linear model
-% with data Y, design matrix X, precision matrix P and normal-Wishart
-% distributed priors for regression coefficients (M0, L0) and
+% with data matrix Y, design matrix X, precision matrix P and normal-
+% Wishart distributed priors for regression coefficients (M0, L0) and
 % signal covariance (O0, v0).
 % 
 % References:
@@ -35,8 +35,8 @@ function [Mn, Ln, On, vn] = MGLM_Bayes(Y, X, P, M0, L0, O0, v0)
 
 % Get model dimensions
 %-------------------------------------------------------------------------%
-n = size(Y,1);                  % number of signals
-v = size(Y,2);                  % number of observations
+n = size(Y,1);                  % number of observations
+v = size(Y,2);                  % number of signals
 p = size(X,2);                  % number of regressors
 
 % Set precision if required
