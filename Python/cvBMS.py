@@ -29,7 +29,7 @@ So far, the following model structures are available:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 27/04/2022, 13:18
+Edited: 06/07/2022, 11:19
 """
 
 
@@ -347,13 +347,13 @@ class GLM:
     
     
 ###############################################################################
-# class: multivariate general linear model                                      #
+# class: multivariate general linear model                                    #
 ###############################################################################
 class MGLM:
     """
     The MGLM class allows to specify, estimate and assess multivariate general
-    linear models a.k.a. multivariate regression which is defined by an n x 1
-    data vector y, an n x p design matrix X and an n x n covariance matrix V.
+    linear models a.k.a. multivariate regression which is defined by an n x v
+    data matrix Y, an n x p design matrix X and an n x n covariance matrix V.
     
     Edited: 27/04/2022, 13:18
     """
@@ -381,7 +381,7 @@ class MGLM:
         self.V = V                          # covariance matrix
         self.P = np.linalg.inv(V)           # precision matrix
         self.n = Y.shape[0]                 # number of observations
-        self.v = Y.shape[1]                 # number of instances
+        self.v = Y.shape[1]                 # number of signals
         self.p = X.shape[1]                 # number of regressors
         
     # function: ordinary least squares
@@ -414,7 +414,7 @@ class MGLM:
         Maximum Likelihood Estimation for Multivariate General Linear Model
         (B_est, S_est) = glm.MLE()
             B_est - a p x v matrix of estimated regression coefficients
-            S_est - a v x v vector of estimated covariance matrix
+            S_est - a v x v matrix, the estimated covariance matrix
         """
         B_est = self.WLS()
         E_est = self.Y - (self.X @ B_est)
@@ -467,7 +467,7 @@ class MGLM:
         """
         
         # calculate log model evidence
-        LME = self.v/2 * np.log(np.linalg.det(self.P)) - (self.n*self.v)/2 * np.log(2*np.pi)      \
+        LME = self.v/2 * np.log(np.linalg.det(self.P)) - (self.n*self.v)/2 * np.log(2*np.pi)  \
             + self.v/2 * np.log(np.linalg.det(L0))     - self.v/2 * np.log(np.linalg.det(Ln)) \
             + v0/2 * np.log(np.linalg.det(1/2*O0))     - vn/2 * np.log(np.linalg.det(1/2*On)) \
             + sp_special.multigammaln(vn/2,self.v)     - sp_special.multigammaln(v0/2,self.v)
@@ -482,7 +482,7 @@ class MGLM:
         Cross-Validated Log Model Evidence for Multivariate General Linear Model
         cvLME = mglm.cvLME(S)
             S     - the number of subsets into which data are partitioned (default: 2)
-            cvLME - a 1 x 1 scalar, the cross-validated log model evidence
+            cvLME - a scalar, the cross-validated log model evidence of the MGLM
         """
         
         # determine data partition
