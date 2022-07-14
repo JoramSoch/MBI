@@ -48,18 +48,18 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 06/07/2022, 15:56
+% Edited: 14/07/2022, 17:26
 
 
 % Set inputs if required
 %-------------------------------------------------------------------------%
-if isempty(X)  || nargin < 3, X  = [];                  end;
-if isempty(V)  || nargin < 4, V  = eye(numel(x));       end;
-if isempty(CV) || nargin < 5, CV = ML_CV(x, 10, 'kfc'); end;
+if nargin < 3 || isempty(X) , X  = [];                  end;
+if nargin < 4 || isempty(V) , V  = eye(numel(x));       end;
+if nargin < 5 || isempty(CV), CV = ML_CV(x, 10, 'kfc'); end;
 
 % Set type if required
 %-------------------------------------------------------------------------%
-if isempty(type) || nargin < 6
+if nargin < 6 || isempty(type)
     % classification, if all are integer and at most 5 classes
     if numel(unique(x)) <= 5 && all((x-round(x))<exp(-23))
         type = 'MBC';
@@ -74,14 +74,10 @@ end;
 if isempty(prior) || nargin < 7
     % discrete uniform, if classification
     if strcmp(type,'MBC')
-        C = max(x);
-        prior.x = [1:C];
-        prior.p = (1/C)*ones(1,C);
+        prior = uniprior('disc', max(x));
     % continuous uniform, if regression
     elseif strcmp(type,'MBR')
-        L = 100;
-        prior.x = [min(x):(range(x)/(L-1)):max(x)];
-        prior.p = (1/range(x))*ones(1,L);
+        prior = uniprior('cont', 100, min(x), max(x));
     else
         warning('ML_MBI:invalid_type', 'Analysis type is invalid (must be "MBC" or "MBR")!');
     end;

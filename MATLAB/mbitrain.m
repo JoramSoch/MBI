@@ -33,13 +33,13 @@ function MBA = mbitrain(Y, x, X, V, type)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 20/02/2022, 08:50
+% Edited: 14/07/2022, 17:20
 
 
 % Set inputs if required
 %-------------------------------------------------------------------------%
-if isempty(X) || nargin < 3, X = [];                  end;
-if isempty(V) || nargin < 4, V = eye(size(numel(x))); end;
+if nargin < 3 || isempty(X), X = [];                  end;
+if nargin < 4 || isempty(V), V = eye(size(numel(x))); end;
 
 % Set type if required
 %-------------------------------------------------------------------------%

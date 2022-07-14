@@ -21,27 +21,23 @@ function PP = mbitest(Y, x, X, V, MBA, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 06/07/2022, 15:29
+% Edited: 14/07/2022, 17:22
 
 
 % Set inputs if required
 %-------------------------------------------------------------------------%
-if isempty(X) || nargin < 3, X = [];                  end;
-if isempty(V) || nargin < 4, V = eye(size(numel(x))); end;
+if nargin < 3 || isempty(X), X = [];                  end;
+if nargin < 4 || isempty(V), V = eye(size(numel(x))); end;
 
 % Set prior if required
 %-------------------------------------------------------------------------%
 if isempty(prior) || nargin < 5
     % discrete uniform, if classification
     if MBA.is_MBC
-        C = max(MBA.input.x);
-        prior.x = [1:C];
-        prior.p = (1/C)*ones(1,C);
+        prior = uniprior('disc', max(MBA.input.x));
     % continuous uniform, if regression
     else
-        L = 100;
-        prior.x = [min(MBA.input.x):(range(MBA.input.x)/(L-1)):max(MBA.input.x)];
-        prior.p = (1/range(MBA.input.x))*ones(1,L);
+        prior = uniprior('cont', 100, min(MBA.input.x), max(MBA.input.x));
     end;
 end;    
         
