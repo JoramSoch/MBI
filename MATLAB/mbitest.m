@@ -31,7 +31,7 @@ if nargin < 4 || isempty(V), V = eye(size(numel(x))); end;
 
 % Set prior if required
 %-------------------------------------------------------------------------%
-if isempty(prior) || nargin < 5
+if nargin < 5 || isempty(prior)
     % discrete uniform, if classification
     if MBA.is_MBC
         prior = uniprior('disc', max(MBA.input.x));

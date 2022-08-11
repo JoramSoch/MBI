@@ -71,7 +71,7 @@ end;
 
 % Set prior if required
 %-------------------------------------------------------------------------%
-if isempty(prior) || nargin < 7
+if nargin < 7 || isempty(prior)
     % discrete uniform, if classification
     if strcmp(type,'MBC')
         prior = uniprior('disc', max(x));

@@ -43,7 +43,7 @@ if nargin < 4 || isempty(V), V = eye(size(numel(x))); end;
 
 % Set type if required
 %-------------------------------------------------------------------------%
-if isempty(type) || nargin < 5
+if nargin < 5 || isempty(type)
     % classification, if all are integer and at most 5 classes
     if numel(unique(x)) <= 5 && all((x-round(x))<exp(-23))
         type = 'MBC';
