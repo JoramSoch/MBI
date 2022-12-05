@@ -499,7 +499,7 @@ class cvMBI:
             # collect true and predicted
             for i in range(i2.size):
                 xt[i2[i]] = x2[i]
-                xp[i2[i]] = prior['x'][PP[i2[i],:]==np.max(PP[i2[i],:])]
+                xp[i2[i]] = prior['x'][PP[i2[i],:]==np.max(PP[i2[i],:])][0]
         
         # store prediction results
         self.xt = xt
