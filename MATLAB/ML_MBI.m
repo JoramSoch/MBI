@@ -104,18 +104,18 @@ p = strcmp(type,'MBC')*C + strcmp(type,'MBR')*2 + size(X,2);
 
 % Prepare analysis display
 %-------------------------------------------------------------------------%
-fprintf('\n');
-fprintf('-> Multivariate Bayesian inversion:\n');
-fprintf('   - %d x %d design matrix;\n', n, p);
-fprintf('   - %d x %d data matrix;\n', n, v);
-fprintf('   - k = %d CV folds;\n', k);
-if strcmp(type,'MBC')
-    fprintf('   - C = %d classes;\n', C);
-elseif strcmp(type,'MBR')
-    fprintf('   - 1 target variable;\n');
-end;
-fprintf('\n');
-fprintf('-> Cross-validated estimation:\n');
+% fprintf('\n');
+% fprintf('-> Multivariate Bayesian inversion:\n');
+% fprintf('   - %d x %d design matrix;\n', n, p);
+% fprintf('   - %d x %d data matrix;\n', n, v);
+% fprintf('   - k = %d CV folds;\n', k);
+% if strcmp(type,'MBC')
+%     fprintf('   - C = %d classes;\n', C);
+% elseif strcmp(type,'MBR')
+%     fprintf('   - 1 target variable;\n');
+% end;
+% fprintf('\n');
+% fprintf('-> Cross-validated estimation:\n');
 
 % Cross-validated inversion
 %-------------------------------------------------------------------------%
@@ -125,7 +125,7 @@ xp = zeros(n,1);                % predicted classes
 PP = zeros(n,L);                % posterior probabilities
 for g = 1:k
     
-    fprintf('   - CV fold %d: ', g);
+    % fprintf('   - CV fold %d: ', g);
     % get test and training set
     i1 = find(CV(:,g)==1);      % indices
     i2 = find(CV(:,g)==2);
@@ -143,54 +143,59 @@ for g = 1:k
     V1 = V(i1,i1);              % covariance
     V2 = V(i2,i2);
     
-    fprintf('training, ');
+    % fprintf('training, ');
     % training data: X is known, infer on B/T
     MBA1 = mbitrain(Y1, x1, X1, V1, type);
     
-    fprintf('test, ');
+    % fprintf('test, ');
     % test data: B/T are known, infer on X
     PP(i2,:) = mbitest(Y2, x2, X2, V2, MBA1, prior);
     
-    fprintf('done.\n');
+    % fprintf('done.\n');
     % collect true and predicted
     for i = 1:numel(i2)
         xt(i2(i)) = x2(i);
-        xp(i2(i)) = prior.x(PP(i2(i),:)==max(PP(i2(i),:)));
+        [m, j]    = max(PP(i2(i),:));
+        xp(i2(i)) = prior.x(j);
+      % xp(i2(i)) = prior.x(PP(i2(i),:)==max(PP(i2(i),:)));
     end;
 
 end;
 clear i1 i2 Y1 Y2 x1 x2 X1 X2 V1 V2
-fprintf('\n');
+% fprintf('\n');
 
 % Calculate performance (MBC)
 %-------------------------------------------------------------------------%
 if strcmp(type,'MBC')
-    DA = mean(xp==xt);      % decoding accuracy
+    DA = mean(xp==xt);          % decoding accuracy
     CA = zeros(C,1);
-    for j = 1:C             % class accuracies
+    for j = 1:C                 % class accuracies
         CA(j,1) = mean(xp(xt==j)==j);
-    end;                    % balanced accuracy
+    end;                        % balanced accuracy
     BA = mean(CA);
     [ph, DA_CI] = binofit(uint16(round(DA*n)),   n,  0.1);
     [ph, BA_CI] = binofit(uint16(floor(BA*n)),   n,  0.1);
     [ph, CA_CI] = binofit(uint16(round(CA.*N')), N', 0.1);
     CM = zeros(C,C);
-    for j = 1:C             % confusion matrix
+    for j = 1:C                 % confusion matrix
         CM(:,j) = mean(repmat(xp(xt==j),[1 C])==repmat([1:C],[sum(xt==j) 1]))';
     end;
+    clear ph
 end;
 
 % Calculate performance (MBR)
 %-------------------------------------------------------------------------%
-[a, b, c, d] = corrcoef(xp, xt, 'Alpha', 0.1);
-r   =  a(1,2);                  % correlation coefficient
-r_p =  b(1,2);                  % correlation p-value
-r_CI= [c(1,2), d(1,2)];         % 90% confidence interval
-mn  = polyfit(xt,xp,1);         % slope and intercept
-R2  = r.^2;
-MAE = mean(abs(xp-xt));
-MSE = mean((xp-xt).^2);
-clear a b c d
+if strcmp(type,'MBR')
+    [a, b, c, d] = corrcoef(xp, xt, 'Alpha', 0.1);
+    r   =  a(1,2);              % correlation coefficient
+    r_p =  b(1,2);              % correlation p-value
+    r_CI= [c(1,2), d(1,2)];     % 90% confidence interval
+    mn  = polyfit(xt,xp,1);     % slope and intercept
+    R2  = r.^2;                 % coefficient of determination
+    MAE = mean(abs(xp-xt));     % mean absolute error
+    MSE = mean((xp-xt).^2);     % mean squared error
+    clear a b c d
+end;
 
 % Assemble MBI structure
 %-------------------------------------------------------------------------%
