@@ -38,8 +38,8 @@ function MBA = mbitrain(Y, x, X, V, type)
 
 % Set inputs if required
 %-------------------------------------------------------------------------%
-if nargin < 3 || isempty(X), X = [];                  end;
-if nargin < 4 || isempty(V), V = eye(size(numel(x))); end;
+if nargin < 3 || isempty(X), X = [];            end;
+if nargin < 4 || isempty(V), V = eye(numel(x)); end;
 
 % Set type if required
 %-------------------------------------------------------------------------%
