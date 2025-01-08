@@ -506,7 +506,7 @@ class cvMBI:
         self.xp = xp
         self.PP = PP
         
-    # function: MBI-based prediction
+    # function: performance evaluation
     #-------------------------------------------------------------------------#
     def evaluate(self, meas=None):
         """
