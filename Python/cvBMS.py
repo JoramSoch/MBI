@@ -29,13 +29,14 @@ So far, the following model structures are available:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 06/07/2022, 11:19
+Edited: 26/02/2025, 12:54
 """
 
 
 # import packages
 #-----------------------------------------------------------------------------#
 import numpy as np
+import scipy.sparse as sp_sparse
 import scipy.special as sp_special
 
 
@@ -169,7 +170,7 @@ class GLM:
     linear models a.k.a. linear regression which is defined by an n x 1 data
     vector y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 27/04/2022, 13:18
+    Edited: 26/02/2025, 12:53
     """
     
     # initialize GLM
@@ -191,9 +192,16 @@ class GLM:
         """
         self.Y = Y                          # data matrix
         self.X = X                          # design matrix
-        if V is None: V = np.eye(Y.shape[0])# covariance matrix
+        if V is None:                       # covariance matrix
+            V = np.eye(Y.shape[0])
+        if type(V) == np.ndarray:           # precision matrix
+            P = np.linalg.inv(V)
+        elif type(V) == sp_sparse._dia.dia_matrix:
+            P = sp_sparse.linalg.inv(V)
+        else:
+            P = None
         self.V = V                          # covariance matrix
-        self.P = np.linalg.inv(V)           # precision matrix
+        self.P = P                          # precision matrix
         self.n = Y.shape[0]                 # number of observations
         self.v = Y.shape[1]                 # number of instances
         self.p = X.shape[1]                 # number of regressors
@@ -355,7 +363,7 @@ class MGLM:
     linear models a.k.a. multivariate regression which is defined by an n x v
     data matrix Y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 27/04/2022, 13:18
+    Edited: 26/02/2025, 12:54
     """
     
     # initialize MGLM
@@ -377,9 +385,16 @@ class MGLM:
         """
         self.Y = Y                          # data matrix
         self.X = X                          # design matrix
-        if V is None: V = np.eye(Y.shape[0])# covariance matrix
+        if V is None:                       # covariance matrix
+            V = np.eye(Y.shape[0])
+        if type(V) == np.ndarray:           # precision matrix
+            P = np.linalg.inv(V)
+        elif type(V) == sp_sparse._dia.dia_matrix:
+            P = sp_sparse.linalg.inv(V)
+        else:
+            P = None
         self.V = V                          # covariance matrix
-        self.P = np.linalg.inv(V)           # precision matrix
+        self.P = P                          # precision matrix
         self.n = Y.shape[0]                 # number of observations
         self.v = Y.shape[1]                 # number of signals
         self.p = X.shape[1]                 # number of regressors
@@ -400,7 +415,7 @@ class MGLM:
     def WLS(self):
         """
         Weighted Least Squares for Multivariate General Linear Model
-        B_est = glm.WLS()
+        B_est = mglm.WLS()
             B_est - a p x v matrix of estimated regression coefficients
         """
         B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
@@ -412,7 +427,7 @@ class MGLM:
     def MLE(self):
         """
         Maximum Likelihood Estimation for Multivariate General Linear Model
-        (B_est, S_est) = glm.MLE()
+        (B_est, S_est) = mglm.MLE()
             B_est - a p x v matrix of estimated regression coefficients
             S_est - a v x v matrix, the estimated covariance matrix
         """

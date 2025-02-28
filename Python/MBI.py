@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 06/07/2022, 16:06
+Edited: 28/02/2025, 10:14
 """
 
 
@@ -255,16 +255,21 @@ class model(cvBMS.MGLM):
         L     = prior['x'].size
         PP    = np.zeros((self.n,L))
         logPP = np.zeros((self.n,L))
-        for i in range(self.n): # for each data point in the test set
+        p_ind = [j for j in range(L) if prior['p'][j] != 0]
+        
+        # for each data point in the test set
+        for i in range(self.n):
             y2i = np.array([ self.Y[i,:] ])
             x2i = np.array([ self.X[i,:] ])
-            vii = np.array([[self.V[i,i]]])
-            for j in range(L):  # for each possible value of the label
+            vii = np.array([[self.V.diagonal()[i]]])
+            
+            # for each label value (where prior is non-zero)
+            for j in p_ind:  
                 x2ij = x2i
-                if self.is_MBC:
+                if self.is_MBC:             # classification -> categorical
                     x2ij[0,:L] = 0
                     x2ij[0,j]  = 1
-                else:
+                else:                       # regression -> parametric
                     x2ij[0,0]  = prior['x'][j]
                 # specify model assuming that the label = x for this point
                 mij            = cvBMS.MGLM(y2i, x2ij, vii)
@@ -273,15 +278,19 @@ class model(cvBMS.MGLM):
                 logPP[i,j] = -self.v/2 * np.linalg.slogdet(L2)[1] \
                            -      v2/2 * np.linalg.slogdet(O2)[1] \
                            +             np.log(prior['p'][j])
-              # logPP[i,j] = -self.v/2 * np.log(np.linalg.det(L2)) \
-              #            -      v2/2 * np.log(np.linalg.det(O2)) \
-              #            +             np.log(prior['p'][j])
-            PP[i,:] = np.exp(logPP[i,:] - np.mean(logPP[i,:]))
+              # PP[i,j]    = np.sqrt( np.power(np.linalg.det(L2), -v) /
+              #                       np.power(np.linalg.det(O2), v2))*
+              #              prior['p'][j]
+            
+            PP[i,p_ind] = np.exp(logPP[i,p_ind] - np.mean(logPP[i,p_ind]))
+          # PP[i,:]     = np.exp(logPP[i,:] - np.mean(logPP[i,:]))
             # normalize posterior distribution to sum/integrate to one
-            if self.is_MBC:
+            if self.is_MBC:                 # classification -> mass
                 PP[i,:] = (1/np.sum(PP[i,:])) * PP[i,:]
-            else:
+            else:                           # regression -> density
                 PP[i,:] = (1/np.trapz(PP[i,:], prior['x'])) * PP[i,:]
+        
+        # return posterior probabilities
         return PP
 
 

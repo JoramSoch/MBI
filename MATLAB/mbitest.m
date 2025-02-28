@@ -21,7 +21,7 @@ function PP = mbitest(Y, x, X, V, MBA, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 14/07/2022, 17:22
+% Edited: 28/02/2025, 10:13
 
 
 % Set inputs if required
@@ -67,14 +67,14 @@ v1 = MBA.post.v1;
 
 % Calculate posterior probabilities
 %-------------------------------------------------------------------------%
-L  = numel(prior.x);
-PP = zeros(n,L);
+L     = numel(prior.x);
+PP    = zeros(n,L);
 logPP = zeros(n,L);
-for i = 1:n                     % loop over test data points
+for i = 1:n                     % loop over data points in the test set
     y2i = Y2(i,:);
     x2i = X2(i,:);
     pii = 1/V2(i,i);
-    for j = 1:L                 % loop over classes/levels
+    for j = find(prior.p)       % loop over label values (where prior is non-zero)
         x2ij = x2i;
         if MBA.is_MBC           % classification -> categorical
             x2ij(j)   = 1;
@@ -86,7 +86,7 @@ for i = 1:n                     % loop over test data points
       % PP(i,j)          = sqrt( (det(L2))^(-v) / (det(O2))^(v2) ) * prior.p(j);
     end
     PP(i,prior.p~=0) = exp(logPP(i,prior.p~=0)-mean(logPP(i,prior.p~=0)));
-  % PP(i,:) = exp(logPP(i,:)-mean(logPP(i,:)));
+  % PP(i,:)          = exp(logPP(i,:)-mean(logPP(i,:)));
     if MBA.is_MBC               % classification -> mass
         PP(i,:) = PP(i,:)./sum(PP(i,:));
     else                        % regression -> density
