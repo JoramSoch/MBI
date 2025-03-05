@@ -12,6 +12,7 @@ Version History:
 - 26/02/2025, 17:03: ported code to Python (Step 3)
 - 05/03/2025, 11:02: added to GitHub repository
 - 05/03/2025, 15:22: corrected confusion matrix
+- 05/03/2025, 18:25: removed sparse covariances
 """
 
 
@@ -22,7 +23,6 @@ MBI_dir = '../../Python/'
 import os
 import readMNIST
 import numpy as np
-import scipy.sparse as sp_sparse
 import statsmodels.api as sm
 from sklearn import svm
 import matplotlib as mpl
@@ -106,7 +106,7 @@ if 2 in steps:
         
         # MBC: training
         print('     - training: MBC ... ', end='')
-        MBA1 = MBI.model(Y1[:n1,:], x1[:n1], V=sp_sparse.eye(n1), mb_type='MBC').train()
+        MBA1 = MBI.model(Y1[:n1,:], x1[:n1], V=None, mb_type='MBC').train()
         print('successful!')
         
         # SVC: training
@@ -124,7 +124,7 @@ if 2 in steps:
             
             # MBC: testing
             print('       - testing: MBC ... ', end='')
-            PP2 = MBI.model(Y2[:n2,:], x2[:n2], V=sp_sparse.eye(n2), mb_type='MBC').test(MBA1)
+            PP2 = MBI.model(Y2[:n2,:], x2[:n2], V=None, mb_type='MBC').test(MBA1)
             xp  = np.argmax(PP2, axis=1) + 1
             CA_MBC[j,i] = np.mean(xp==x2[:n2])
             print('successful!')

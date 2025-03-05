@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/03/2025, 15:15
+Edited: 05/03/2025, 18:16
 """
 
 
@@ -172,13 +172,12 @@ class model(cvBMS.MGLM):
         elif mb_type == 'MBR':              # regression
             Xx = np.c_[x, np.ones((Y.shape[0],1))]
         if X is None: X = np.zeros((Y.shape[0],0))
-        if V is None: V = np.eye(Y.shape[0])
         
         # store model information
         X = np.c_[Xx, X]                    # enhanced design matrix
         super().__init__(Y, X, V)           # inherit parent class
-        self.x      = x
-        self.is_MBC =(mb_type == 'MBC')
+        self.x      = x                     # label vector
+        self.is_MBC =(mb_type == 'MBC')     # analysis type
     
     # function: training for MBI
     #-------------------------------------------------------------------------#
@@ -262,7 +261,8 @@ class model(cvBMS.MGLM):
         for i in range(self.n):
             y2i = np.array([ self.Y[i,:] ])
             x2i = np.array([ self.X[i,:] ])
-            vii = np.array([[self.V.diagonal()[i]]])
+            if self.iid: vii = np.array([[ 1           ]])
+            else:        vii = np.array([[ self.V[i,i] ]])
             
             # for each label value (where prior is non-zero)
             for j in p_ind:  
@@ -331,23 +331,29 @@ class cvMBI:
         covariance V into an object for later furter operations (see below).
         """
         
-        # set matrices if required
+        # set matrix if required
         if X is None: X = np.zeros((Y.shape[0],0))
-        if V is None: V = np.eye(Y.shape[0])
-
+        
         # store model information
         if mb_type == 'MBC':
             self.is_MBC = True
         elif mb_type == 'MBR':
             self.is_MBC = False
         self.mb_type = mb_type
-        self.Y = Y
-        self.x = x
-        self.X = X
-        self.V = V
-        self.n = Y.shape[0]
-        self.v = Y.shape[1]
-        
+        self.Y = Y                          # data matrix
+        self.x = x                          # label vector
+        self.X = X                          # design matrix
+        if V is None:
+            self.V   = None                 # covariance matrix
+            self.P   = None                 # precision matrix
+            self.iid = True                 # i.i.d. errors
+        else:
+            self.V   = V                    # covariance matrix
+            self.P   = np.linalg.inv(V)     # precision matrix
+            self.iid = np.all(V == np.eye(Y.shape[0]))
+        self.n = Y.shape[0]                 # number of data points
+        self.v = Y.shape[1]                 # number of features
+    
     # function: cross-validation
     #-------------------------------------------------------------------------#
     def crossval(self, c=None, k=10, cv_mode='kfc', cv_mat=None):
@@ -482,20 +488,24 @@ class cvMBI:
             # get training and test set
             i1 = np.nonzero(self.CV[:,g]==1)
             i2 = np.nonzero(self.CV[:,g]==2)
-            i1 = np.array(i1[0], dtype=int)
+            i1 = np.array(i1[0], dtype=int) # CV fold indices
             i2 = np.array(i2[0], dtype=int)
-            Y1 = self.Y[i1,:]
+            Y1 = self.Y[i1,:]               # data matrices
             Y2 = self.Y[i2,:]
-            x1 = self.x[i1]
+            x1 = self.x[i1]                 # label vectors
             x2 = self.x[i2]
-            if self.X.shape[1] > 0:
+            if self.X.shape[1] > 0:         # covariate matrices
                 X1 = self.X[i1,:]
                 X2 = self.X[i2,:]
             else:
                 X1 = None
                 X2 = None
-            V1 = self.V[i1,:][:,i1]
-            V2 = self.V[i2,:][:,i2]
+            if self.iid:                    # covariance matrices
+                V1 = None
+                V2 = None
+            else: 
+                V1 = self.V[i1,:][:,i1]
+                V2 = self.V[i2,:][:,i2]
             
             # training data: X is known, infer on B/T
             m1   = model(Y1, x1, X1, V1, self.mb_type)
@@ -509,7 +519,7 @@ class cvMBI:
             # collect true and predicted
             for i in range(i2.size):
                 xt[i2[i]] = x2[i]
-                xp[i2[i]] = prior['x'][PP[i2[i],:]==np.max(PP[i2[i],:])][0]
+                xp[i2[i]] = prior['x'][np.argmax(PP[i2[i],:])]
         
         # store prediction results
         self.xt = xt

@@ -29,14 +29,13 @@ So far, the following model structures are available:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 26/02/2025, 12:54
+Edited: 05/03/2025, 16:01
 """
 
 
 # import packages
 #-----------------------------------------------------------------------------#
 import numpy as np
-import scipy.sparse as sp_sparse
 import scipy.special as sp_special
 
 
@@ -170,7 +169,7 @@ class GLM:
     linear models a.k.a. linear regression which is defined by an n x 1 data
     vector y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 26/02/2025, 12:53
+    Edited: 05/03/2025, 15:59
     """
     
     # initialize GLM
@@ -192,16 +191,14 @@ class GLM:
         """
         self.Y = Y                          # data matrix
         self.X = X                          # design matrix
-        if V is None:                       # covariance matrix
-            V = np.eye(Y.shape[0])
-        if type(V) == np.ndarray:           # precision matrix
-            P = np.linalg.inv(V)
-        elif type(V) == sp_sparse._dia.dia_matrix:
-            P = sp_sparse.linalg.inv(V)
+        if V is None:                       
+            self.V   = None                 # covariance matrix
+            self.P   = None                 # precision matrix
+            self.iid = True                 # i.i.d. errors
         else:
-            P = None
-        self.V = V                          # covariance matrix
-        self.P = P                          # precision matrix
+            self.V   = V                    # covariance matrix
+            self.P   = np.linalg.inv(V)     # precision matrix
+            self.iid = np.all(V == np.eye(Y.shape[0]))
         self.n = Y.shape[0]                 # number of observations
         self.v = Y.shape[1]                 # number of instances
         self.p = X.shape[1]                 # number of regressors
@@ -225,8 +222,12 @@ class GLM:
         B_est = glm.WLS()
             B_est - a p x v matrix of estimated regression coefficients
         """
-        B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
-        B_est = B_cov @ (self.X.T @ self.P @ self.Y)
+        if self.iid:
+            B_cov = np.linalg.inv(self.X.T @ self.X)
+            B_est = B_cov @ (self.X.T @ self.Y)
+        else:
+            B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
+            B_est = B_cov @ (self.X.T @ self.P @ self.Y)
         return B_est
     
     # function: maximum likelihood estimation
@@ -241,8 +242,12 @@ class GLM:
         B_est  = self.WLS()
         E_est  = self.Y - (self.X @ B_est)
         s2_est = np.zeros(self.v)
-        for j in range(self.v):
-            s2_est[j] = 1/self.n * (E_est[:,j].T @ self.P @ E_est[:,j])
+        if self.iid:
+            for j in range(self.v):
+                s2_est[j] = 1/self.n * (E_est[:,j].T @ E_est[:,j])
+        else:
+            for j in range(self.v):
+                s2_est[j] = 1/self.n * (E_est[:,j].T @ self.P @ E_est[:,j])
         return B_est, s2_est
     
     # function: Bayesian estimation
@@ -268,13 +273,19 @@ class GLM:
             b0 = b0 * np.ones(self.v)
         
         # estimate posterior parameters
-        PY = self.P @ self.Y
-        Ln = self.X.T @ self.P @ self.X + L0
+        if self.iid:
+            PY = self.Y
+            Ln = self.X.T @ self.X + L0
+        else:
+            PY = self.P @ self.Y
+            Ln = self.X.T @ self.P @ self.X + L0            
         mn = np.linalg.inv(Ln) @ ( self.X.T @ PY + L0 @ m0 )
         an = a0 + self.n/2
         bn = np.zeros(self.v)
         for j in range(self.v):
-            bn[j] = b0[j] + 1/2 * ( self.Y[:,j].T @ PY[:,j] + m0[:,j].T @ L0 @ m0[:,j] - mn[:,j].T @ Ln @ mn[:,j] )
+            bn[j] = b0[j] + 1/2 * ( self.Y[:,j].T @ PY[:,j]
+                                  + m0[:,j].T @ L0 @ m0[:,j]
+                                  - mn[:,j].T @ Ln @ mn[:,j] )
         
         # return posterior parameters
         return mn, Ln, an, bn
@@ -294,11 +305,15 @@ class GLM:
             LME - a 1 x v vector of log model evidences
         """
         
+        # calculate log-determinant
+        if self.iid: log_det_P = 0 
+        else:        log_det_P = np.linalg.slogdet(self.P)[1]
+        
         # calculate log model evidence
-        LME = 1/2 * np.log(np.linalg.det(self.P)) - self.n/2 * np.log(2*np.pi)      \
-            + 1/2 * np.log(np.linalg.det(L0))     - 1/2 * np.log(np.linalg.det(Ln)) \
-            + sp_special.gammaln(an)              - sp_special.gammaln(a0)          \
-            + a0 * np.log(b0)                     - an * np.log(bn)
+        LME = 1/2 * log_det_P                 - self.n/2 * np.log(2*np.pi)      \
+            + 1/2 * np.log(np.linalg.det(L0)) - 1/2 * np.log(np.linalg.det(Ln)) \
+            + sp_special.gammaln(an)          - sp_special.gammaln(a0)          \
+            + a0 * np.log(b0)                 - an * np.log(bn)
         
         # return log model evidence
         return LME
@@ -335,12 +350,14 @@ class GLM:
             # partition data
             Y1 = self.Y[i1,:]                           # training data
             X1 = self.X[i1,:]
-            P1 = self.P[i1,:][:,i1]
-            S1 = GLM(Y1, X1, P1)
+            if self.iid: V1 = None
+            else:        V1 = self.V[i1,:][:,i1]
+            S1 = GLM(Y1, X1, V1)
             Y2 = self.Y[i2,:]                           # test data
             X2 = self.X[i2,:]
-            P2 = self.P[i2,:][:,i2]
-            S2 = GLM(Y2, X2, P2)
+            if self.iid: V2 = None
+            else:        V2 = self.V[i2,:][:,i2]
+            S2 = GLM(Y2, X2, V2)
             
             # calculate oosLME
             m01 = m0_ni; L01 = L0_ni; a01 = a0_ni; b01 = b0_ni;
@@ -363,7 +380,7 @@ class MGLM:
     linear models a.k.a. multivariate regression which is defined by an n x v
     data matrix Y, an n x p design matrix X and an n x n covariance matrix V.
     
-    Edited: 26/02/2025, 12:54
+    Edited: 05/03/2025, 16:06
     """
     
     # initialize MGLM
@@ -385,16 +402,14 @@ class MGLM:
         """
         self.Y = Y                          # data matrix
         self.X = X                          # design matrix
-        if V is None:                       # covariance matrix
-            V = np.eye(Y.shape[0])
-        if type(V) == np.ndarray:           # precision matrix
-            P = np.linalg.inv(V)
-        elif type(V) == sp_sparse._dia.dia_matrix:
-            P = sp_sparse.linalg.inv(V)
+        if V is None:                       
+            self.V   = None                 # covariance matrix
+            self.P   = None                 # precision matrix
+            self.iid = True                 # i.i.d. errors
         else:
-            P = None
-        self.V = V                          # covariance matrix
-        self.P = P                          # precision matrix
+            self.V   = V                    # covariance matrix
+            self.P   = np.linalg.inv(V)     # precision matrix
+            self.iid = np.all(V == np.eye(Y.shape[0]))
         self.n = Y.shape[0]                 # number of observations
         self.v = Y.shape[1]                 # number of signals
         self.p = X.shape[1]                 # number of regressors
@@ -418,8 +433,12 @@ class MGLM:
         B_est = mglm.WLS()
             B_est - a p x v matrix of estimated regression coefficients
         """
-        B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
-        B_est = B_cov @ (self.X.T @ self.P @ self.Y)
+        if self.iid:
+            B_cov = np.linalg.inv(self.X.T @ self.X)
+            B_est = B_cov @ (self.X.T @ self.Y)
+        else:
+            B_cov = np.linalg.inv(self.X.T @ self.P @ self.X)
+            B_est = B_cov @ (self.X.T @ self.P @ self.Y)
         return B_est
     
     # function: maximum likelihood estimation
@@ -433,7 +452,10 @@ class MGLM:
         """
         B_est = self.WLS()
         E_est = self.Y - (self.X @ B_est)
-        S_est = 1/self.n * (E_est.T @ self.P @ E_est)
+        if self.iid:
+            S_est = 1/self.n * (E_est.T @ E_est)
+        else:
+            S_est = 1/self.n * (E_est.T @ self.P @ E_est)
         return B_est, S_est
     
     # function: Bayesian estimation
@@ -457,8 +479,12 @@ class MGLM:
             M0 = np.tile(M0, (1, self.v))
         
         # estimate posterior parameters
-        PY = self.P @ self.Y
-        Ln = self.X.T @ self.P @ self.X + L0
+        if self.iid:
+            PY = self.Y
+            Ln = self.X.T @ self.X + L0
+        else:
+            PY = self.P @ self.Y
+            Ln = self.X.T @ self.P @ self.X + L0
         Mn = np.linalg.solve(Ln, self.X.T @ PY + L0 @ M0)
         vn = v0 + self.n
         On = O0 + self.Y.T @ PY + M0.T @ L0 @ M0 - Mn.T @ Ln @ Mn
@@ -481,11 +507,15 @@ class MGLM:
             LME - a 1 x 1 scalar, the log model evidence
         """
         
+        # calculate log-determinant
+        if self.iid: log_det_P = 0 
+        else:        log_det_P = np.linalg.slogdet(self.P)[1]
+        
         # calculate log model evidence
-        LME = self.v/2 * np.log(np.linalg.det(self.P)) - (self.n*self.v)/2 * np.log(2*np.pi)  \
-            + self.v/2 * np.log(np.linalg.det(L0))     - self.v/2 * np.log(np.linalg.det(Ln)) \
-            + v0/2 * np.log(np.linalg.det(1/2*O0))     - vn/2 * np.log(np.linalg.det(1/2*On)) \
-            + sp_special.multigammaln(vn/2,self.v)     - sp_special.multigammaln(v0/2,self.v)
+        LME = self.v/2 * log_det_P                 - (self.n*self.v)/2 * np.log(2*np.pi)  \
+            + self.v/2 * np.log(np.linalg.det(L0)) - self.v/2 * np.log(np.linalg.det(Ln)) \
+            + v0/2 * np.log(np.linalg.det(1/2*O0)) - vn/2 * np.log(np.linalg.det(1/2*On)) \
+            + sp_special.multigammaln(vn/2,self.v) - sp_special.multigammaln(v0/2,self.v)
         
         # return log model evidence
         return LME
@@ -522,12 +552,14 @@ class MGLM:
             # partition data
             Y1 = self.Y[i1,:]                           # training data
             X1 = self.X[i1,:]
-            P1 = self.P[i1,:][:,i1]
-            S1 = MGLM(Y1, X1, P1)
+            if self.iid: V1 = None
+            else:        V1 = self.V[i1,:][:,i1]
+            S1 = MGLM(Y1, X1, V1)
             Y2 = self.Y[i2,:]                           # test data
             X2 = self.X[i2,:]
-            P2 = self.P[i2,:][:,i2]
-            S2 = MGLM(Y2, X2, P2)
+            if self.iid: V2 = None
+            else:        V2 = self.V[i2,:][:,i2]
+            S2 = MGLM(Y2, X2, V2)
             
             # calculate oosLME
             M01 = M0_ni; L01 = L0_ni; O01 = O0_ni; v01 = v0_ni;

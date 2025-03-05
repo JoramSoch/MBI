@@ -39,8 +39,9 @@ Si = np.array([[1,0.5],[0.5,1]])            # feature covariance
 s2 = 4                                      # noise variance
 n  = 300                                    # number of data points
 k  = 10                                     # number of CV folds
-v  = 3                                      # number of features
-C  = 2                                      # number of classes
+v  = 2                                      # number of features
+C  = 3                                      # number of classes
+
 # generate classes
 x  = np.kron(np.arange(C).reshape((C,1))+1, np.ones((int(n/C),1)))
 x  = np.random.permutation(x[:,0])          # randomized labels
