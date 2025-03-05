@@ -62,8 +62,8 @@ E = np.squeeze(E)
 Y = X @ B + E
 
 # preallocate results
-DA  = np.zeros(2)
-DAp = np.zeros(C)
+CA  = np.zeros(2)
+CAp = np.zeros(C)
 
 # prepare prediction grid
 lim = 6
@@ -76,7 +76,7 @@ x2  = np.concatenate((np.arange(C)+1, np.ones(n2-C)))
 MBC   = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
 MBC.crossval(k=k, cv_mode='kfc')
 MBC.predict()
-DA[0] = MBC.evaluate('DA')
+CA[0] = MBC.evaluate('CA')
 MBA   = MBI.model(Y, x, V=V, mb_type='MBC').train()
 
 # Analysis 2: SVC
@@ -92,7 +92,7 @@ for g in range(k):
     SVC = svm.SVC(kernel='linear', C=1)
     SVC.fit(Y1, x1)
     xp[i2] = SVC.predict(Y2)
-DA[1] = np.mean(xp==x)
+CA[1] = np.mean(xp==x)
 SVM   = svm.LinearSVC(C=1); SVM.fit(Y, x)
 
 # Analysis 1: priors
@@ -102,7 +102,7 @@ for j in range(C):
     MBC    = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
     MBC.crossval(k=k, cv_mode='kfc')
     MBC.predict(prior=prior)
-    DAp[j] = MBC.evaluate('DA')
+    CAp[j] = MBC.evaluate('CA')
     del MBC
 
 # Analysis 1 & 2: predictions
@@ -175,7 +175,7 @@ axs[0,1].set_xlabel('feature 1', fontsize=16)
 axs[0,1].set_ylabel('feature 2', fontsize=16)
 axs[0,1].set_title('MBC: posterior probabilities', fontsize=20, fontweight='bold')
 axs[0,1].tick_params(axis='both', labelsize=12)
-axs[0,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[0]*100),
+axs[0,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[0]*100),
               color=(1,1,1), fontsize=12, ha='right', va='bottom')
 
 # plot SVC predicted classes
@@ -186,7 +186,7 @@ axs[0,2].set_xlabel('feature 1', fontsize=16)
 axs[0,2].set_ylabel('feature 2', fontsize=16)
 axs[0,2].set_title('SVC: predicted classes', fontsize=20, fontweight='bold')
 axs[0,2].tick_params(axis='both', labelsize=12)
-axs[0,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[1]*100),
+axs[0,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[1]*100),
               color=(1,1,1), fontsize=12, ha='right', va='bottom')
 
 # plot MBC with modified priors
@@ -199,7 +199,7 @@ for j in range(C):
     axs[1,j].set_title('MBC: class {} more likely a priori'.format(j+1),
                        fontsize=16, fontweight='bold')
     axs[1,j].tick_params(axis='both', labelsize=12)
-    axs[1,j].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DAp[0]*100),
+    axs[1,j].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CAp[0]*100),
                   color=(1,1,1), fontsize=12, ha='right', va='bottom')
 
 # enable tight layout

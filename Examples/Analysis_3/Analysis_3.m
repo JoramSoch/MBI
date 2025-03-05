@@ -113,7 +113,7 @@ for h = 2 % 1:numel(labs)
         ylabel('predicted class', 'FontSize', 12);
         if h == 1
             if g == 1, title('MBC with covariates', 'FontSize', 16); end;
-            if g == 2, title('SVC with regression', 'FontSize', 16);    end;
+            if g == 2, title('SVC with regression', 'FontSize', 16); end;
         end;
         for c1 = 1:nC(h)
             for c2 = 1:nC(h)

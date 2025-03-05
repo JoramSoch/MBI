@@ -74,7 +74,7 @@ Y = X @ B + E
 MBC = [None for h in range(2)]
 SVC = [None for h in range(2)]
 Xp  = [None for h in range(2)]
-DA  = np.zeros((2,2))
+CA  = np.zeros((2,2))
 la  = np.logical_and
 
 # prepare decision boundary
@@ -89,13 +89,13 @@ x2  = np.concatenate((np.array([1]), 2*np.ones(n2-1)))
 MBC[0]  = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
 MBC[0].crossval(k=k, cv_mode='kfc')
 MBC[0].predict()
-DA[0,0] = MBC[0].evaluate('DA')
+CA[0,0] = MBC[0].evaluate('CA')
 
 # Analysis 2: MBC with covariate
 MBC[1]  = MBI.cvMBI(Y, x, X=c, V=V, mb_type='MBC')
 MBC[1].crossval(k=k, cv_mode='kfc')
 MBC[1].predict()
-DA[1,0] = MBC[1].evaluate('DA')
+CA[1,0] = MBC[1].evaluate('CA')
 
 # Analysis 3: SVM w/o covariate
 # Analysis 4: SVM with prior regression
@@ -123,8 +123,8 @@ for g in range(k):
 del i1, i2, Y1, Y2, Yr1, Yr2, x1
 Xp[0]   = xp3
 Xp[1]   = xp4
-DA[0,1] = np.mean(xp3==x)
-DA[1,1] = np.mean(xp4==x)
+CA[0,1] = np.mean(xp3==x)
+CA[1,1] = np.mean(xp4==x)
 del xp3, xp4
 
 # Analysis 1: decision boundary
@@ -205,7 +205,7 @@ axs[0,1].set_xlabel('feature 1', fontsize=16)
 axs[0,1].set_ylabel('feature 2', fontsize=16)
 axs[0,1].set_title('MBC w/o correction', fontsize=20, fontweight='bold')
 axs[0,1].tick_params(axis='both', labelsize=12)
-axs[0,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[0,0]*100),
+axs[0,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[0,0]*100),
               fontsize=12, ha='right', va='bottom')
 
 # plot MBC with covariate inclusion
@@ -225,7 +225,7 @@ axs[1,1].set_xlabel('feature 1', fontsize=16)
 axs[1,1].set_ylabel('feature 2', fontsize=16)
 axs[1,1].set_title('MBC with covariate inclusion', fontsize=20, fontweight='bold')
 axs[1,1].tick_params(axis='both', labelsize=12)
-axs[1,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[1,0]*100),
+axs[1,1].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[1,0]*100),
               fontsize=12, ha='right', va='bottom')
 
 # plot SVC w/o correction
@@ -245,7 +245,7 @@ axs[0,2].set_xlabel('feature 1', fontsize=16)
 axs[0,2].set_ylabel('feature 2', fontsize=16)
 axs[0,2].set_title('SVC w/o correction', fontsize=20, fontweight='bold')
 axs[0,2].tick_params(axis='both', labelsize=12)
-axs[0,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[0,1]*100),
+axs[0,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[0,1]*100),
               fontsize=12, ha='right', va='bottom')
 
 # plot SVC with prior regression
@@ -265,7 +265,7 @@ axs[1,2].set_xlabel('feature 1', fontsize=16)
 axs[1,2].set_ylabel('feature 2', fontsize=16)
 axs[1,2].set_title('SVC with prior regression', fontsize=20, fontweight='bold')
 axs[1,2].tick_params(axis='both', labelsize=12)
-axs[1,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(DA[1,1]*100),
+axs[1,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[1,1]*100),
               fontsize=12, ha='right', va='bottom')
 
 # enable tight layout

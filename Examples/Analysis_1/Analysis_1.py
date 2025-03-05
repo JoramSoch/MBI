@@ -75,7 +75,7 @@ xt[2] = x[it[2]]; xt[2][xt[2]==5] = 2;
 # preallocate results
 MBC = [None for h in range(len(iC))]
 SVC = [None for h in range(len(iC))]
-DA  = np.zeros((2,len(iC)))
+CA  = np.zeros((2,len(iC)))
 nC  = [len(i) for i in iC]
 
 # Analyses 1: MBC
@@ -84,7 +84,7 @@ for h in range(len(iC)):
     MBC[h]  = MBI.cvMBI(Y[it[h],:], xt[h], V=Vh, mb_type='MBC')
     MBC[h].crossval(k=k, cv_mode='kfc')
     MBC[h].predict()
-    DA[0,h] = MBC[h].evaluate('DA')
+    CA[0,h] = MBC[h].evaluate('CA')
 del Vh
 
 # Analyses 2: SVC
@@ -105,7 +105,7 @@ for h in range(len(iC)):
         SVC.fit(Y1, x1)
         xph[i2] = SVC.predict(Y2)
     xp[h]   = xph
-    DA[1,h] = np.mean(xph==xh)
+    CA[1,h] = np.mean(xph==xh)
 del Yh, xh, xph, SVC
 
 
@@ -178,9 +178,9 @@ for h in range(len(xt)):
                                 fontsize=10, ha='center', va='center')
 
 # classification accuracies
-axs[0,2].bar(np.arange(3)-1.5*dx, DA[0,:],
+axs[0,2].bar(np.arange(3)-1.5*dx, CA[0,:],
              width=2*dx, align='center', color=(0,0,1), edgecolor='k', label='MBC')
-axs[0,2].bar(np.arange(3)+1.5*dx, DA[1,:],
+axs[0,2].bar(np.arange(3)+1.5*dx, CA[1,:],
              width=2*dx, align='center', color=(1,0,0), edgecolor='k', label='SVC')
 axs[0,2].plot([-1, 0.5, 0.5, 1.5, 1.5, 3], [1/5, 1/5, 1/3, 1/3, 1/2, 1/2], ':k',
               linewidth=2, label='chance')

@@ -523,12 +523,12 @@ class cvMBI:
         perf = MBCR.evaluate(meas)
             meas - a string indicating the performance measure to use,
                    if classification (MBC)
-                   o 'DA' - decoding accuracy (default)
-                   o 'CA' - class accuracies
-                   o 'BA' - balanced accuracy
+                   o 'CA'  - classification accuracy (default)
+                   o 'CAs' - class accuracies
+                   o 'BA'  - balanced accuracy
                    or if regression (MBR)
-                   o 'r'  - correlation coefficient (default)
-                   o 'MAE'- mean absolute error
+                   o 'r'   - correlation coefficient (default)
+                   o 'MAE' - mean absolute error
             
             perf - a scalar, the predictive performance of the model
             
@@ -538,19 +538,19 @@ class cvMBI:
         
         # set measure if required
         if meas is None:
-            if self.is_MBC: meas = 'DA'
+            if self.is_MBC: meas = 'CA'
             else:           meas = 'r'
         
         # calculate performance
-        if meas == 'DA':                    # decoding accuracy
+        if meas == 'CA':                    # classification accuracy
             perf = np.mean(self.xp==self.xt)
-        if meas == 'CA':                    # class accuracies
+        if meas == 'CAs':                   # class accuracies
             C    = int(np.max(self.xt))
             perf = np.zeros(C)
             for j in range(C):
                 perf[j] = np.mean(self.xp[self.xt==(j+1)]==(j+1))
         if meas == 'BA':                    # balanced accuracy
-            perf = np.mean(self.evaluate('CA'))
+            perf = np.mean(self.evaluate('CAs'))
         if meas == 'r':                     # correlation coefficient
             perf = np.corrcoef(self.xp, self.xt)[0,1]
         if meas == 'MAE':                   # mean absolute error

@@ -94,7 +94,7 @@ end;
 
 % confusion matrices
 nC = zeros(1,numel(iC));
-DA = zeros(2,numel(xt));
+CA = zeros(2,numel(xt));
 for h = 1:numel(xt)
     nC(h) = numel(iC{h});
     for g = 1:2
@@ -117,14 +117,14 @@ for h = 1:numel(xt)
                 text(c1, c2, sprintf('%0.2f', CM(c2,c1)), 'HorizontalAlignment', 'Center', 'VerticalAlignment', 'Middle');
             end;
         end;
-        if g == 1, DA(g,h) = MBC(h).perf.DA; end;
-        if g == 2, DA(g,h) = SVC(h).perf.DA; end;
+        if g == 1, CA(g,h) = MBC(h).perf.CA; end;
+        if g == 2, CA(g,h) = SVC(h).perf.DA; end;
     end;
 end;
 
 % classification accuracies
 subplot(v-1,2*(v-1),3); hold on;
-bp = bar([1:numel(nC)], DA', 'grouped');
+bp = bar([1:numel(nC)], CA', 'grouped');
 set(bp(1), 'FaceColor', 'b');
 set(bp(2), 'FaceColor', 'r');
 plot([0, 1.5, 1.5, 2.5, 2.5, 4], [1/5, 1/5, 1/3, 1/3, 1/2, 1/2], ':k', 'LineWidth', 2);

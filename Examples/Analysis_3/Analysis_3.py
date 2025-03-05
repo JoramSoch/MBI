@@ -54,8 +54,8 @@ v = Y.shape[1]
 ### Step 2: analyze data ######################################################
 
 # specify parameters
-k   = 10
-V   = np.eye(n)
+k = 10
+V = np.eye(n)
 
 # preallocate results
 xt  = [X[:,0], X[:,1], X[:,2]]

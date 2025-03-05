@@ -43,7 +43,7 @@ end;
 
 % specify cross-validation
 CV = ML_CV(x, k, 'kfc');
-DA = zeros(2,numel(mu));
+CA = zeros(2,numel(mu));
 
 % run simulations
 for h = 1:numel(mu)
@@ -56,7 +56,7 @@ for h = 1:numel(mu)
     
     % cross-validated MBC
     MBC(1,h) = ML_MBI(Y, x, [], V, CV, 'MBC', []);
-    DA(1,h)  = MBC(1,h).perf.DA;
+    CA(1,h)  = MBC(1,h).perf.CA;
     
     % generate signals (distance fixed)
     B = [-mu(end), +mu(end);
@@ -66,7 +66,7 @@ for h = 1:numel(mu)
     
     % cross-validated MBC
     MBC(2,h) = ML_MBI(Y, x, [], V, CV, 'MBC', []);
-    DA(2,h)  = MBC(2,h).perf.DA;
+    CA(2,h)  = MBC(2,h).perf.CA;
     
 end;
 
@@ -108,7 +108,7 @@ for g = 1:2
     subplot(2,numel(mu)+1,g*(numel(mu)+1));  hold on;
     if g == 1, x_gh = sqrt(8*mu.^2); end;
     if g == 2, x_gh = sqrt(s2); end;
-    plot(x_gh, DA(g,:), ':ok', 'LineWidth', 2, 'MarkerSize', 2);
+    plot(x_gh, CA(g,:), ':ok', 'LineWidth', 2, 'MarkerSize', 2);
     xlim([min(x_gh)-0.1, max(x_gh)+0.1]);
     ylim([(0.5-0.05), (1+0.05)]);
     set(gca,'Box','On');

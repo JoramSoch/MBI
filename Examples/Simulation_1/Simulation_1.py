@@ -70,7 +70,7 @@ for h in range(mu.size):
     MBC[0][h] = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
     MBC[0][h].crossval(k=k, cv_mode='kfc')
     MBC[0][h].predict()
-    DA[0,h]   = MBC[0][h].evaluate('DA')
+    DA[0,h]   = MBC[0][h].evaluate('CA')
     
     # generate signals (distance fixed)
     B = np.array([[-mu[-1], +mu[-1]], [+mu[-1], -mu[-1]]])
@@ -82,7 +82,7 @@ for h in range(mu.size):
     MBC[1][h] = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
     MBC[1][h].crossval(k=k, cv_mode='kfc')
     MBC[1][h].predict()
-    DA[1,h]   = MBC[1][h].evaluate('DA')
+    DA[1,h]   = MBC[1][h].evaluate('CA')
 
     
 ### Step 3: visualize results #################################################

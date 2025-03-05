@@ -66,14 +66,14 @@ SVC = ML_SVC(x, Y, CV, 1, 1, 0);
 SVM = svmtrain(x, Y, '-s 0 -t 0 -c 1 -q');
 
 % Analysis 1: priors
-DA  = [MBC.perf.DA, SVC.perf.DA];
-DAp = zeros(1,C);
+CA  = [MBC.perf.CA, SVC.perf.DA];
+CAp = zeros(1,C);
 for k = 1:C
     prior.x    = [1:C];
     prior.p    = 1/6*ones(1,C);
     prior.p(k) = 2/3;
     MBC        = ML_MBI(Y, x, [], V, CV, 'MBC', prior);
-    DAp(k)     = MBC.perf.DA;
+    CAp(k)     = MBC.perf.CA;
 end;
 
 % Analysis 1 & 2: predictions
@@ -149,7 +149,7 @@ set(gca,'Box','On');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
 title('MBC: posterior probabilities', 'FontSize', 16);
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', DA(1)*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', CA(1)*100), ...
      'Color', 'w', 'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 
 % plot SVC predicted classes
@@ -161,7 +161,7 @@ set(gca,'Box','On');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
 title('SVC: predicted classes', 'FontSize', 16);
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', DA(2)*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', CA(2)*100), ...
      'Color', 'w', 'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 
 % plot MBC with modified priors
@@ -174,6 +174,6 @@ for k = 1:C
     xlabel('feature 1', 'FontSize', 12);
     ylabel('feature 2', 'FontSize', 12);
     title(sprintf('MBC: class %d more likely a priori', k), 'FontSize', 16);
-    text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', DAp(k)*100), ...
+    text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', CAp(k)*100), ...
          'Color', 'w', 'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 end;

@@ -48,7 +48,7 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 14/07/2022, 17:26
+% Edited: 05/03/2025, 11:23
 
 
 % Set inputs if required
@@ -102,21 +102,6 @@ else
 end;
 p = strcmp(type,'MBC')*C + strcmp(type,'MBR')*2 + size(X,2);
 
-% Prepare analysis display
-%-------------------------------------------------------------------------%
-% fprintf('\n');
-% fprintf('-> Multivariate Bayesian inversion:\n');
-% fprintf('   - %d x %d design matrix;\n', n, p);
-% fprintf('   - %d x %d data matrix;\n', n, v);
-% fprintf('   - k = %d CV folds;\n', k);
-% if strcmp(type,'MBC')
-%     fprintf('   - C = %d classes;\n', C);
-% elseif strcmp(type,'MBR')
-%     fprintf('   - 1 target variable;\n');
-% end;
-% fprintf('\n');
-% fprintf('-> Cross-validated estimation:\n');
-
 % Cross-validated inversion
 %-------------------------------------------------------------------------%
 L  = numel(prior.x);            % classes/levels
@@ -125,7 +110,6 @@ xp = zeros(n,1);                % predicted classes
 PP = zeros(n,L);                % posterior probabilities
 for g = 1:k
     
-    % fprintf('   - CV fold %d: ', g);
     % get test and training set
     i1 = find(CV(:,g)==1);      % indices
     i2 = find(CV(:,g)==2);
@@ -143,15 +127,12 @@ for g = 1:k
     V1 = V(i1,i1);              % covariance
     V2 = V(i2,i2);
     
-    % fprintf('training, ');
     % training data: X is known, infer on B/T
     MBA1 = mbitrain(Y1, x1, X1, V1, type);
     
-    % fprintf('test, ');
     % test data: B/T are known, infer on X
     PP(i2,:) = mbitest(Y2, x2, X2, V2, MBA1, prior);
     
-    % fprintf('done.\n');
     % collect true and predicted
     for i = 1:numel(i2)
         xt(i2(i)) = x2(i);
@@ -162,20 +143,19 @@ for g = 1:k
 
 end;
 clear i1 i2 Y1 Y2 x1 x2 X1 X2 V1 V2
-% fprintf('\n');
 
 % Calculate performance (MBC)
 %-------------------------------------------------------------------------%
 if strcmp(type,'MBC')
-    DA = mean(xp==xt);          % decoding accuracy
-    CA = zeros(C,1);
+    CA  = mean(xp==xt);         % classification accuracy
+    CAs = zeros(C,1);
     for j = 1:C                 % class accuracies
-        CA(j,1) = mean(xp(xt==j)==j);
+        CAs(j,1) = mean(xp(xt==j)==j);
     end;                        % balanced accuracy
-    BA = mean(CA);
-    [ph, DA_CI] = binofit(uint16(round(DA*n)),   n,  0.1);
-    [ph, BA_CI] = binofit(uint16(floor(BA*n)),   n,  0.1);
-    [ph, CA_CI] = binofit(uint16(round(CA.*N')), N', 0.1);
+    BA = mean(CAs);
+    [ph, CA_CI]  = binofit(uint16(round(CA*n)),    n,  0.1);
+    [ph, BA_CI]  = binofit(uint16(floor(BA*n)),    n,  0.1);
+    [ph, CAs_CI] = binofit(uint16(round(CAs.*N')), N', 0.1);
     CM = zeros(C,C);
     for j = 1:C                 % confusion matrix
         CM(:,j) = mean(repmat(xp(xt==j),[1 C])==repmat([1:C],[sum(xt==j) 1]))';
@@ -216,12 +196,12 @@ MBI.pred.PP    = PP;
 MBI.pred.xt    = xt;
 MBI.pred.xp    = xp;
 if strcmp(type,'MBC')
-    MBI.perf.DA    = DA;
-    MBI.perf.BA    = BA;
     MBI.perf.CA    = CA;
-    MBI.perf.DA_CI = DA_CI;
-    MBI.perf.BA_CI = BA_CI;
+    MBI.perf.BA    = BA;
+    MBI.perf.CAs   = CAs;
     MBI.perf.CA_CI = CA_CI;
+    MBI.perf.BA_CI = BA_CI;
+    MBI.perf.CAs_CI= CAs_CI;
     MBI.perf.CM    = CM;
 elseif strcmp(type,'MBR')
     MBI.perf.r     = r;

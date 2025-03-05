@@ -145,7 +145,7 @@ axis([-lim, +lim, -lim, +lim]);
 axis square;
 set(gca,'Box','On');
 legend('class 1, predicted 1', 'class 2, predicted 1', 'class 1, predicted 2', 'class 2, predicted 2', 'Location', 'NorthWest');
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', MBC(1).perf.DA*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', MBC(1).perf.CA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
@@ -161,7 +161,7 @@ plot(Y_MBC(:,1), Y_MBC(:,2), '-k', 'Color', 0.5*[1,1,1], 'LineWidth', 1);
 axis([-lim, +lim, -lim, +lim]);
 axis square;
 set(gca,'Box','On');
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', MBC(2).perf.DA*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', MBC(2).perf.CA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
