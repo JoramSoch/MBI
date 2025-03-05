@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 28/02/2025, 10:14
+Edited: 05/03/2025, 11:46
 """
 
 
@@ -81,6 +81,7 @@ def matnrnd(M, U, V, c=1, A=None, B=None):
         R[:,:,i] = M + A @ R[:,:,i] @ B
     
     # return random matrix
+    R = np.squeeze(R)
     return R
 
 # function: uniform prior distribution
@@ -97,8 +98,8 @@ def uniprior(x_type='disc', L=100, x_min=0, x_max=1):
         x_max  - a scalar, the maximum possible value (only if x_type is 'cont')
         
         prior  - a dictionary specifying the prior distribution
-        o x   - a  1 x L vector of possible label values
-        o p   - a  1 x L vector of probabilities or densities 
+        o x    - a  1 x L vector of possible label values
+        o p    - a  1 x L vector of probabilities or densities 
     """
     
     # discrete random variable (classes)

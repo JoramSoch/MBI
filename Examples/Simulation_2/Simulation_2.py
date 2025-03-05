@@ -67,7 +67,6 @@ B = np.array([[-mu, +mu],
               [+mu, -mu],
               [  0,  b3]])
 E = MBI.matnrnd(np.zeros((n,v)), s2*V, Si, 1)
-E = np.squeeze(E)
 Y = X @ B + E
 
 # preallocate results

@@ -67,7 +67,6 @@ nb  = np.histogram(x, bins=xb)[0]
 # generate data
 B = np.random.normal(mu, np.sqrt(sb), size=(X.shape[1],v))
 E = MBI.matnrnd(np.zeros((n,v)), s2*V, Si, 1)
-E = np.squeeze(E)
 Y = X @ B + E
 
 # preallocate results

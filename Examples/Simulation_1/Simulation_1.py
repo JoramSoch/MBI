@@ -63,7 +63,6 @@ for h in range(mu.size):
     # generate signals (variance fixed)
     B = np.array([[-mu[h], +mu[h]], [+mu[h], -mu[h]]])
     E = MBI.matnrnd(np.zeros((n,v)), s2[0]*V, Si, 1)
-    E = np.squeeze(E)
     Y = X @ B + E
     
     # cross-validated MBC
@@ -75,7 +74,6 @@ for h in range(mu.size):
     # generate signals (distance fixed)
     B = np.array([[-mu[-1], +mu[-1]], [+mu[-1], -mu[-1]]])
     E = MBI.matnrnd(np.zeros((n,v)), s2[h]*V, Si, 1)
-    E = np.squeeze(E)
     Y = X @ B + E
     
     # cross-validated MBC
