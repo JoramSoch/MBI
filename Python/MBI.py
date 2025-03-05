@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/03/2025, 18:16
+Edited: 05/03/2025, 18:53
 """
 
 
@@ -106,16 +106,16 @@ def uniprior(x_type='disc', L=100, x_min=0, x_max=1):
     if x_type == 'disc':
         C = int(L)
         prior = {
-            "x": np.arange(0,C) + 1,
-            "p": (1/C) * np.ones(C)
+            'x': np.arange(0,C) + 1,
+            'p': (1/C) * np.ones(C)
         }
     
     # continuous random variable (targets)
     if x_type == 'cont':
         if L is None: L = 100
         prior = {
-            "x": np.linspace(x_min, x_max, L),
-            "p": (1/(x_max-x_min)) * np.ones(L)
+            'x': np.linspace(x_min, x_max, L),
+            'p': (1/(x_max-x_min)) * np.ones(L)
         }
     
     # return uniform prior
@@ -207,10 +207,10 @@ class model(cvBMS.MGLM):
         
         # assemble MBA dictionary
         MBA = {
-            "input": {"x" : self.x},
-            "data" : {"Y1": self.Y, "X1": self.X, "V1": self.V},
-            "prior": {"M0": M0, "L0": L0, "O0": O0, "v0": v0},
-            "post" : {"M1": M1, "L1": L1, "O1": O1, "v1": v1}
+            'input': {'x' : self.x},
+            'data' : {'Y1': self.Y, 'X1': self.X, 'V1': self.V},
+            'prior': {'M0': M0, 'L0': L0, 'O0': O0, 'v0': v0},
+            'post' : {'M1': M1, 'L1': L1, 'O1': O1, 'v1': v1}
         }
         return MBA
     
@@ -480,8 +480,8 @@ class cvMBI:
         
         # cross-validated analysis
         L  = prior['x'].size                # classes/levels
-        xt = np.zeros(self.n)               # "true" classes
-        xp = np.zeros(self.n)               # predicted classes
+        xt = np.zeros(self.n)               # actual labels
+        xp = np.zeros(self.n)               # predicted labels
         PP = np.zeros((self.n,L))           # posterior probabilities
         for g in range(k):
             

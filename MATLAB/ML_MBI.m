@@ -105,8 +105,8 @@ p = strcmp(type,'MBC')*C + strcmp(type,'MBR')*2 + size(X,2);
 % Cross-validated inversion
 %-------------------------------------------------------------------------%
 L  = numel(prior.x);            % classes/levels
-xt = zeros(n,1);                % "true" classes
-xp = zeros(n,1);                % predicted classes
+xt = zeros(n,1);                % actual labels
+xp = zeros(n,1);                % predicted labels
 PP = zeros(n,L);                % posterior probabilities
 for g = 1:k
     
