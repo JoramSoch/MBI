@@ -12,6 +12,7 @@ Version History:
 - 26/02/2025, 11:18: ported code to Python (Step 3)
 - 05/03/2025, 11:01: added to GitHub repository
 - 05/03/2025, 15:21: recoded confusion matrix
+- 05/03/2025, 18:38: unified tick font sizes
 """
 
 
@@ -138,6 +139,7 @@ for k1 in range(0,v-1):
                               np.max(Y[:,k2])+(1/20)*np.ptp(Y[:,k2]))
         axs[k2-1,k1].set_xlabel(hdr[k1], fontsize=16)
         axs[k2-1,k1].set_ylabel(hdr[k2], fontsize=16)
+        axs[k2-1,k1].tick_params(axis='both', labelsize=10)
         if k1 == 0 and k2 == 1:
             handles, labels = axs[k2-1,k1].get_legend_handles_labels()
             axs[k2-1,k1].set_title('Data Set', fontsize=16, fontweight='bold')
@@ -191,6 +193,7 @@ axs[0,2].legend([handles[i] for i in o], [labels[i] for i in o],
 axs[0,2].set_xlabel('number of classes', fontsize=16)
 axs[0,2].set_ylabel('classification accuracy', fontsize=16)
 axs[0,2].set_title('Classification', fontsize=16, fontweight='bold')
+axs[0,2].tick_params(axis='both', labelsize=10)
 
 # enable tight layout
 fig.tight_layout()

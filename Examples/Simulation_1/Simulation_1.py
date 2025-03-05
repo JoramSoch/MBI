@@ -118,7 +118,7 @@ for g in range(2):
             axs[g,h].set_title('std. dev.: {:.0f}'.format(np.sqrt(s2[h])),
                                fontsize=20, fontweight='bold')
         axs[g,h].tick_params(axis='both', labelsize=12)
-        
+    
     # plot accuracies
     if g == 0: x_gh = np.sqrt(8*(mu)**2)
     if g == 1: x_gh = np.sqrt(s2)

@@ -11,6 +11,7 @@ Version History:
 - 27/02/2025, 18:01: ported code to Python (Step 1 & 2)
 - 28/02/2025, 11:16: ported code to Python (Step 3)
 - 05/03/2025, 11:04: added to GitHub repository
+- 05/03/2025, 18:45: unified tick font sizes
 """
 
 
@@ -131,6 +132,7 @@ axs[0,0].axis([x_min, x_max, 0, (11/10)*np.max(nb1)])
 axs[0,0].set_xlabel('chronological age [yrs]', fontsize=16)
 axs[0,0].set_ylabel('number of subjects', fontsize=16)
 axs[0,0].set_title('Training Set', fontsize=16, fontweight='bold')
+axs[0,0].tick_params(axis='both', labelsize=10)
 
 for h in range(len(prior)):
     axs[0,1+h].plot([x_min, x_max], [x_min, x_max], '-k', linewidth=1)
@@ -142,6 +144,7 @@ for h in range(len(prior)):
     if h == 1:
         axs[0,1+h].set_title('MBR with site/gender as covariates',
                              fontsize=16, fontweight='bold')
+    axs[0,1+h].tick_params(axis='both', labelsize=10)
     axs[0,1+h].text(x_min+5, x_max-5, 'r = {:.2f}, MAE = {:.2f}'.format(rA[h], maeA[h]),
                     fontsize=12, ha='left', va='center')
 
@@ -153,6 +156,7 @@ axs[0,4].set_xlabel('actual age', fontsize=16)
 axs[0,4].set_ylabel('predicted age', fontsize=16)
 axs[0,4].set_title('SVR with site/gender as features',
                    fontsize=16, fontweight='bold')
+axs[0,4].tick_params(axis='both', labelsize=10)
 axs[0,4].text(x_min+5, x_max-5, 'r = {:.2f}, MAE = {:.2f}'.format(rB, maeB),
               fontsize=12, ha='left', va='center')
 
@@ -163,6 +167,7 @@ axs[1,0].axis([x_min, x_max, 0, (11/10)*np.max(nb2)])
 axs[1,0].set_xlabel('chronological age [yrs]', fontsize=16)
 axs[1,0].set_ylabel('number of subjects', fontsize=16)
 axs[1,0].set_title('Validation Set', fontsize=16, fontweight='bold')
+axs[1,0].tick_params(axis='both', labelsize=10)
 
 for h in range(len(prior)):
     axs[1,1+h].bar(xb[:-1]+dx/2, nbA[h,:],
@@ -173,6 +178,7 @@ for h in range(len(prior)):
     if h == 1:
         axs[1,1+h].set_title('MBR: prediction distribution',
                              fontsize=16, fontweight='bold')
+    axs[1,1+h].tick_params(axis='both', labelsize=10)
 
 axs[1,4].bar(xb[:-1]+dx/2, nbB,
              width=dx, align='center', color=(1,0,0), edgecolor='k')
@@ -181,6 +187,7 @@ axs[1,4].set_xlabel('predicted age', fontsize=16)
 axs[1,4].set_ylabel('number of subjects', fontsize=16)
 axs[1,4].set_title('SVR: prediction distribution',
                    fontsize=16, fontweight='bold')
+axs[1,4].tick_params(axis='both', labelsize=10)
 
 # 3rd row
 for h in range(len(prior)):
@@ -191,6 +198,7 @@ for h in range(len(prior)):
     axs[2,1+h].set_ylabel('prior density', fontsize=16)
     axs[2,1+h].set_title('{} prior'.format(priors[h]),
                          fontsize=16, fontweight='bold')
+    axs[2,1+h].tick_params(axis='both', labelsize=10)
 axs[2,0].axis('off')
 axs[2,4].axis('off')
 
@@ -221,6 +229,7 @@ for h in range(len(prior)):
         if h == 0:
             axs[h,i].set_title('Subject {}'.format(i+1),
                                fontsize=20, fontweight='bold')
+        axs[h,i].tick_params(axis='both', labelsize=10)
 
 # enable tight layout
 fig1.tight_layout()

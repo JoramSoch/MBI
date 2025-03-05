@@ -13,6 +13,7 @@ Version History:
 - 05/03/2025, 11:02: added to GitHub repository
 - 05/03/2025, 15:22: corrected confusion matrix
 - 05/03/2025, 18:25: removed sparse covariances
+- 05/03/2025, 18:44: unified tick font sizes
 """
 
 
@@ -225,6 +226,7 @@ if 3 in steps:
     axs[0,0].set_xlabel('number of training samples', fontsize=16)
     axs[0,0].set_ylabel('classification accuracy', fontsize=16)
     axs[0,0].set_title('Classification', fontsize=16, fontweight='bold')
+    axs[0,0].tick_params(axis='both', labelsize=12)
     
     # confusion matrices
     for g in range(2):
@@ -238,7 +240,7 @@ if 3 in steps:
         axs[0,1+g].set_yticks(range(nC), labels=labs)
         axs[0,1+g].set_xlabel('true class', fontsize=16)
         axs[0,1+g].set_ylabel('predicted class', fontsize=16)
-        axs[0,1+g].tick_params(axis='both', labelsize=10)
+        axs[0,1+g].tick_params(axis='both', labelsize=12)
         if g == 0:
             axs[0,1+g].set_title('MBC: {} classes'.format(nC),
                                  fontsize=16, fontweight='bold')
@@ -268,6 +270,7 @@ if 3 in steps:
     axs[1,0].set_xlabel('posterior probability of most likely class', fontsize=16)
     axs[1,0].set_ylabel('frequency of most likely being true class', fontsize=14)
     axs[1,0].set_title('Frequency vs. Probability', fontsize=16, fontweight='bold')
+    axs[1,0].tick_params(axis='both', labelsize=12)
     
     # posterior inverse scale matrix
     O1_max = np.max(O1)
@@ -279,6 +282,7 @@ if 3 in steps:
     axs[1,1].set_xlabel('image pixel', fontsize=16)
     axs[1,1].set_ylabel('image pixel', fontsize=16)
     axs[1,1].set_title('MBC: posterior inverse scale matrix', fontsize=16, fontweight='bold')
+    axs[1,1].tick_params(axis='both', labelsize=12)
     
     # posterior inverse scale matrix
     L1_max = np.max(L1)
@@ -290,6 +294,7 @@ if 3 in steps:
     axs[1,2].set_xlabel('digit category', fontsize=16)
     axs[1,2].set_ylabel('digit category', fontsize=16)
     axs[1,2].set_title('MBC: posterior precision matrix', fontsize=16, fontweight='bold')
+    axs[1,2].tick_params(axis='both', labelsize=12)
     
     # open figure
     fig2 = plt.figure(figsize=(20,8))
@@ -342,6 +347,7 @@ if 3 in steps:
                 elif g == 2:
                     axs[g,k].set_ylabel('     incorrect prediction',
                                         fontsize=14, fontweight='bold')
+            axs[g,k].tick_params(axis='both', labelsize=10)
             axs[g,k].set_title('PP(\'{}\') = {:.2f}'.format(lC[xp_i-1], pp_i),
                                fontsize=16, fontweight='bold')
     

@@ -12,6 +12,7 @@ Version History:
 - 27/02/2025, 12:16: ported code to Python (Step 3)
 - 05/03/2025, 11:03: added to GitHub repository
 - 05/03/2025, 15:23: recoded confusion matrix
+- 05/03/2025, 18:40: unified tick font sizes
 """
 
 
@@ -157,9 +158,10 @@ for k in range(len(labs)):
                       np.max(Y[:,1])+(1/20)*np.ptp(Y[:,1]))
     axs[k,0].set_ylim(np.min(Y[:,0])-(1/20)*np.ptp(Y[:,0]),
                       np.max(Y[:,0])+(1/20)*np.ptp(Y[:,0]))
+    axs[k,0].legend(loc='upper right')
     axs[k,0].set_xlabel(y_lab[1], fontsize=16)
     axs[k,0].set_ylabel(y_lab[0], fontsize=16)
-    axs[k,0].legend(loc='upper right')
+    axs[k,0].tick_params(axis='both', labelsize=10)
     if k == 0:
         axs[k,0].set_title('Data Set', fontsize=16, fontweight='bold')
 axs[0,1].axis('off')
@@ -179,6 +181,7 @@ for k1 in range(len(x_lab)):
                                 np.max(yk)+(1/20)*np.ptp(yk))
         axs[1+k2,1+k1].set_xlabel(x_lab[k1], fontsize=16)
         axs[1+k2,1+k1].set_ylabel(y_lab[k2], fontsize=16)
+        axs[1+k2,1+k1].tick_params(axis='both', labelsize=10)
         axs[1+k2,1+k1].text(np.max(xk), np.max(yk), 'r = {:.2f}'.format(rk),
                             fontsize=12, ha='right', va='top')
 
@@ -229,6 +232,7 @@ axs[0,2].legend([handles[i] for i in o], [labels[i] for i in o],
 axs[0,2].set_xlabel('classified variable', fontsize=16)
 axs[0,2].set_ylabel('balanced accuracy', fontsize=16)
 axs[0,2].set_title('Classification', fontsize=16, fontweight='bold')
+axs[0,2].tick_params(axis='both', labelsize=10)
 
 # enable tight layout
 fig.tight_layout()
