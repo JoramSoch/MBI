@@ -37,26 +37,26 @@ os.chdir(orig_dir)
 # load TSV file
 filename = 'Egyptian_Skulls.tsv'
 data = pd.read_csv(filename, sep='\t')
-hdr  = list(data)
+hdr  = list(data)               # column names
 
 # extract data
-xC = np.unique(data[hdr[-1]])
-x  = np.array(data[hdr[-1]])
-Y  = np.array(data[hdr[:-1]])
-n  = Y.shape[0]
-v  = Y.shape[1]
+xC = np.unique(data[hdr[-1]])   # class labels
+x  = np.array(data[hdr[-1]])    # label vector
+Y  = np.array(data[hdr[:-1]])   # data matrix
+n  = Y.shape[0]                 # number of data points
+v  = Y.shape[1]                 # number of features
 
 # assign classes
 C  = xC.size
-for j in range(C):
-    x[x==xC[j]] = j+1
+for j in range(C):              # replace class labels
+    x[x==xC[j]] = j+1           # by 1, 2, 3, ...
 
 
 ### Step 2: analyze data ######################################################
 
 # specify parameters
-k = 10
-V = np.eye(n)
+k = 10                          # number of CV folds
+V = np.eye(n)                   # observation covariance
 
 # specify analyses
 iC    = [None for h in range(3)]

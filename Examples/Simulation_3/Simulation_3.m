@@ -22,17 +22,17 @@ rng(1);
 mu = 1;                         % class means
 Si = [1, 0.5; 0.5, 1];          % covariance structure
 s2 = 4;                         % noise variance
-n  = 300;
-k  = 10;
-v  = 2;
-C  = 3;
+n  = 300;                       % number of data points
+k  = 10;                        % number of CV folds
+v  = 2;                         % number of features
+C  = 3;                         % number of classes
 
 % generate classes
 x = [kron([1:C]',ones(n/C,1)), rand(n,1)];
 x = sortrows(x,2);
-x = x(:,1);
-X = zeros(n,C);
-V = eye(n);
+x  = x(:,1);                    % randomized labels
+X  = zeros(n,C);                % design matrix
+V  = eye(n);                    % observation covariance
 for i = 1:n
     X(i,x(i)) = 1;
 end;

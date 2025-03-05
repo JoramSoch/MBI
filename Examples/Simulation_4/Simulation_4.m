@@ -28,9 +28,9 @@ ny = 0.5;                       % space constant
 Si = toeplitz( ny.^[0:1:(v-1)]);% spatial covariance
 
 % generate targets
-xm = 1;
-x  = (2*xm)*rand(n,1)-xm;
-X  = [x, ones(size(x))];
+xm = 1;                         % -1 < x < +1
+x  = (2*xm)*rand(n,1)-xm;       % x ~ U(-1,+1)
+X  = [x, ones(size(x))];        % design matrix
 
 % histogram of targets
 lim = 1.5;

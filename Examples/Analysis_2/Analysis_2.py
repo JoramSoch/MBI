@@ -41,35 +41,35 @@ steps = [1, 2, 3]
 if 1 in steps:
 
     # load MNIST data
-    fnY1  = 'train-images.idx3-ubyte'
+    fnY1  = 'train-images.idx3-ubyte'       # training data filenames
     fnx1  = 'train-labels.idx1-ubyte'
-    fnY2  = 't10k-images.idx3-ubyte'
+    fnY2  = 't10k-images.idx3-ubyte'        # test data filenames
     fnx2  = 't10k-labels.idx1-ubyte'
     MNIST = readMNIST.MnistDataloader(fnY1, fnx1, fnY2, fnx2)
     (Y1, x1), (Y2, x2) = MNIST.load_data()
     
     # clip and scale images
-    nxy = 28
-    dxy = 4
+    nxy = 28                                # width and height in pixels
+    dxy = 4                                 # pixels to remove on each side
     Y1  = np.array([[[Y1[n][y][x] for n in range(len(Y1))]
                                   for x in range(dxy,nxy-dxy)]
                                   for y in range(dxy,nxy-dxy)])
     Y2  = np.array([[[Y2[n][y][x] for n in range(len(Y2))]
                                   for x in range(dxy,nxy-dxy)]
                                   for y in range(dxy,nxy-dxy)])
-    Y1  = Y1/255
+    Y1  = Y1/255                            # transform [0,255] to [0,1]
     Y2  = Y2/255
     del MNIST, nxy, dxy
     
     # extract data
-    v   = Y1.shape[0]*Y2.shape[1]
-    n1  = Y1.shape[2]
-    n2  = Y2.shape[2]
-    Y1  = np.reshape(Y1, (v,n1), order='F').T
-    Y2  = np.reshape(Y2, (v,n2), order='F').T
-    x1  = np.array(x1)
-    x2  = np.array(x2)
-    x1[x1==0] = 10
+    v   = Y1.shape[0]*Y2.shape[1]           # number of features
+    n1  = Y1.shape[2]                       # number of training data points
+    n2  = Y2.shape[2]                       # number of test data points
+    Y1  = np.reshape(Y1,(v,n1),order='F').T # training data matrix
+    Y2  = np.reshape(Y2,(v,n2),order='F').T # test data matrix
+    x1  = np.array(x1)                      # training labels
+    x2  = np.array(x2)                      # test labels
+    x1[x1==0] = 10                          # replace 0 by 10
     x2[x2==0] = 10
     
     # save extracted data

@@ -19,29 +19,29 @@ close all
 % set ground truth
 rng(1);
 mu = 1;                         % class means
-b3 = 2;                         % confound effect
-Si = [1, 0.5; 0.5, 1];          % covariance structure
+b3 = 2;                         % covariate effect
+Si = [1, 0.5; 0.5, 1];          % feature covariance
 s2 = 4;                         % noise variance
-n  = 250;
-k  = 10;
-v  = 2;
-C  = 2;
+n  = 250;                       % number of data points
+k  = 10;                        % number of CV folds
+v  = 2;                         % number of features
+C  = 2;                         % number of classes
 
 % generate classes
 x = [kron([1:C]',ones(n/C,1)), rand(n,1)];
 x = sortrows(x,2);
-x = x(:,1);
-X = zeros(n,C);
-V = eye(n);
+x  = x(:,1);                    % randomized labels
+X  = zeros(n,C);                % design matrix
+V  = eye(n);                    % observation covariance
 for i = 1:n
     X(i,x(i)) = 1;
 end;
 
-% generate confound
-c = 1.5*rand(n,1)-0.75;
-c(x==1) = c(x==1) + 0.25;
-c(x==2) = c(x==2) - 0.25;
-X = [X, c];
+% generate covariate
+c = 1.5*rand(n,1)-0.75;         % c ~ U(-0.75, +0.75)
+c(x==1) = c(x==1) + 0.25;       % x=1 -> -1 < c < 0.5
+c(x==2) = c(x==2) - 0.25;       % x=2 -> -0.5 < c < 1
+X = [X, c];                     % complete design matrix
 
 
 %%% Step 2: generate & analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

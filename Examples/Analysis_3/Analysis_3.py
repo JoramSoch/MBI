@@ -37,25 +37,25 @@ os.chdir(orig_dir)
 # load TSV file
 filename = 'Birth_Weights.csv'
 data = pd.read_csv(filename, sep=',')
-hdr  = list(data)
+hdr  = list(data)                           # column names
 
 # extract data
-Y = np.array(data[['Birth_weight','Weight']])
-X = np.zeros((Y.shape[0],5))
+Y = np.array(data[['Birth_weight','Weight']])# data matrix
+X = np.zeros((Y.shape[0],5))                # design matrix
 X[:,0] = 1*(data['Smoker']=='no') + 2*(data['Smoker']=='yes')
 X[:,1] = 1*(data['Race']=='white') + 2*(data['Race']=='black') + 3*(data['Race']=='other')
 X[:,2] = 1*(data['Hypertension']=='no') + 2*(data['Hypertension']=='yes')
 X[:,3] = data['Age']
 X[:,4] = data['Visits']
-n = Y.shape[0]
-v = Y.shape[1]
+n = Y.shape[0]                              # number of data points
+v = Y.shape[1]                              # number of features
 
 
 ### Step 2: analyze data ######################################################
 
 # specify parameters
-k = 10
-V = np.eye(n)
+k = 10                                      # number of CV folds
+V = np.eye(n)                               # observation covariance
 
 # preallocate results
 xt  = [X[:,0], X[:,1], X[:,2]]

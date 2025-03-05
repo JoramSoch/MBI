@@ -21,25 +21,25 @@ filename = 'Egyptian_Skulls.tsv';
 
 % extract data
 data = data(~isnan(data(:,5)),:);
-xC   = unique(data(:,5))';
-x    = data(:,5);
-Y    = data(:,1:4);
-n    = size(Y,1);
-v    = size(Y,2);
+xC   = unique(data(:,5))';      % class labels
+x    = data(:,5);               % label vector
+Y    = data(:,1:4);             % data matrix
+n    = size(Y,1);               % number of data points
+v    = size(Y,2);               % number of features
 
 % assign classes
 C = numel(xC);
-for j = 1:C
-    x(x==xC(j)) = j;
+for j = 1:C                     % replace class labels
+    x(x==xC(j)) = j;            % by 1, 2, 3, ...
 end;
 
 
 %%% Step 2: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify cross-validation
-k  = 10;
-CV = ML_CV(x, k, 'kfc');
-V  = eye(numel(x));
+k  = 10;                        % number of CV folds
+V  = eye(numel(x));             % observation covariance
+CV = ML_CV(x, k, 'kfc');        % n x k CV matrix
 
 % specify analyses
 iC{1} = [1:5];

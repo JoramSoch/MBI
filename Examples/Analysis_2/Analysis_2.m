@@ -34,12 +34,12 @@ fnx = 't10k-labels.idx1-ubyte';
 [imgs2, labs2] = readMNIST(fnY, fnx, n2, 0);
 
 % extract data
-v  = size(imgs1,1)*size(imgs1,2);
-Y1 = reshape(imgs1, [v,n1])';
-Y2 = reshape(imgs2, [v,n2])';
-x1 = labs1;
-x2 = labs2;
-x1(x1==0) = 10;
+v  = size(imgs1,1)*size(imgs1,2);%number of features
+Y1 = reshape(imgs1, [v,n1])';   % training data matrix
+Y2 = reshape(imgs2, [v,n2])';   % test data matrix
+x1 = labs1;                     % training labels
+x2 = labs2;                     % test labels
+x1(x1==0) = 10;                 % replace 0 by 10
 x2(x2==0) = 10;
 clear fnY fnx imgs1 labs1 imgs2 labs2
 

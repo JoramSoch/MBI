@@ -30,23 +30,23 @@ import MBI
 os.chdir(orig_dir)
 
 
-### Step 1: specify ground truth & model ######################################
+### Step 1: specify ground truth ##############################################
 
 # set ground truth
 np.random.seed(2)
 mu = np.linspace(0, 1, 5)                   # class means
-Si = np.array([[1,0.5],[0.5,1]])            # covariance structure
+Si = np.array([[1,0.5],[0.5,1]])            # feature covariance
 s2 = np.square(np.linspace(1, 5, 5))        # noise variance
-n  = 250
-k  = 10
-v  = 2
-C  = 2
+n  = 250                                    # number of data points
+k  = 10                                     # number of CV folds
+v  = 2                                      # number of features
+C  = 2                                      # number of classes
 
 # generate classes
 x  = np.kron(np.arange(C).reshape((C,1))+1, np.ones((int(n/C),1)))
-x  = np.random.permutation(x[:,0])
-X  = np.zeros((n,C))
-V  = np.eye(n)
+x  = np.random.permutation(x[:,0])          # randomized labels
+X  = np.zeros((n,C))                        # design matrix
+V  = np.eye(n)                              # observation covariance
 for i in range(n):
     X[i,int(x[i]-1)] = 1
 

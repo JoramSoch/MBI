@@ -49,9 +49,9 @@ ny = 0.5                        # space constant and spatial covariance
 Si = sp_linalg.toeplitz(np.power( ny, np.linspace(0,v-1,v)))
 
 # generate targets
-xm = 1
+xm = 1                          # -1 < x < +1, x ~ U(-1,+1)
 x  = np.random.uniform(-xm, +xm, size=(n,1))
-X  = np.c_[x, np.ones(x.shape)]
+X  = np.c_[x, np.ones(x.shape)] # design matrix
 x  = np.squeeze(x)
 
 # histogram of targets

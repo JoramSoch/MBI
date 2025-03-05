@@ -38,18 +38,18 @@ train = sp.io.loadmat('PAC_specify.mat')
 test  = sp.io.loadmat('PAC_specify_test_age.mat')
 
 # assemble data (MBR)
-n1  = train['sID1'].size
+n1  = train['sID1'].size                    # number of data points
 n2  = train['sID2'].size
-V1  = np.eye(n1)
+V1  = np.eye(n1)                            # observation covariances
 V2  = np.eye(n2)
-YA1 = np.c_[train['GM1'], train['WM1']]
+YA1 = np.c_[train['GM1'], train['WM1']]     # data matrices
 YA2 = np.c_[train['GM2'], train['WM2']]
-x1  = np.squeeze(train['y1'])
+x1  = np.squeeze(train['y1'])               # label vectors
 x2  = np.squeeze(test['y2'])
-XA1 = train['c1'][:,1:]
+XA1 = train['c1'][:,1:]                     # covariate matrices
 XA2 = train['c2'][:,1:]
 
-# assemble data (SVR)
+# assemble data (SVR)                       # feature matrices
 YB1 = np.c_[train['GM1'], train['WM1'], train['c1']]
 YB2 = np.c_[train['GM2'], train['WM2'], train['c2']]
 del train, test

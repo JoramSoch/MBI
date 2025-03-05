@@ -32,32 +32,32 @@ import MBI
 os.chdir(orig_dir)
 
 
-### Step 1: specify ground truth & model ######################################
+### Step 1: specify ground truth ##############################################
 
 # set ground truth
 np.random.seed(3)
 mu = 1                                      # class means
-b3 = 2                                      # confound effect
-Si = np.array([[1,0.5],[0.5,1]])            # covariance structure
+b3 = 2                                      # covariate effect
+Si = np.array([[1,0.5],[0.5,1]])            # feature covariance
 s2 = 4                                      # noise variance
-n  = 250
-k  = 10
-v  = 2
-C  = 2
+n  = 250                                    # number of data points
+k  = 10                                     # number of CV folds
+v  = 2                                      # number of features
+C  = 2                                      # number of classes
 
 # generate classes
 x  = np.kron(np.arange(C).reshape((C,1))+1, np.ones((int(n/C),1)))
-x  = np.random.permutation(x[:,0])
-X  = np.zeros((n,C))
-V  = np.eye(n)
+x  = np.random.permutation(x[:,0])          # randomized labels
+X  = np.zeros((n,C))                        # design matrix
+V  = np.eye(n)                              # observation covariance
 for i in range(n):
     X[i,int(x[i]-1)] = 1
 
-# generate confound
-c  = 1.5*np.random.uniform(size=(n,1))-0.75
-c[x==1] = c[x==1] + 0.25
-c[x==2] = c[x==2] - 0.25
-X  = np.c_[X, c]
+# generate covariate
+c  = 1.5*np.random.uniform(size=(n,1))-0.75 # c ~ U(-0.75, +0.75)
+c[x==1] = c[x==1] + 0.25                    # x=1 -> -1 < c < 0.5
+c[x==2] = c[x==2] - 0.25                    # x=2 -> -0.5 < c < 1
+X  = np.c_[X, c]                            # complete design matrix
 
 
 ### Step 2: generate & analyze the data #######################################

@@ -21,19 +21,19 @@ load PAC_specify.mat
 load PAC_specify_test_age.mat
 
 % assemble data (MBR)
-n1  = numel(sID1);
+n1  = numel(sID1);              % number of data points
 n2  = numel(sID2);
-V1  = eye(n1);
+V1  = eye(n1);                  % observation covariances
 V2  = eye(n2);
-YA1 = [GM1, WM1];
+YA1 = [GM1, WM1];               % data matrices
 YA2 = [GM2, WM2];
-x1  = y1;
+x1  = y1;                       % label vectors
 x2  = y2;
-XA1 = c1(:,2:end);
+XA1 = c1(:,2:end);              % covariate matrices
 XA2 = c2(:,2:end);
 
 % assemble data (SVR)
-YB1 = [GM1, WM1, c1];
+YB1 = [GM1, WM1, c1];           % feature matrices
 YB2 = [GM2, WM2, c2];
 
 % prepare histograms

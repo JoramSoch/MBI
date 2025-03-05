@@ -23,22 +23,22 @@ hdr = {'birth weight','mother''s weight','mother''s age','smoker','ethnicity','h
 fclose(fid);
 
 % extract data
-Y = [raw{1}, raw{2}];
-X = zeros(size(Y,1),5);
+Y = [raw{1}, raw{2}];           % data matrix
+X = zeros(size(Y,1),5);         % design matrix
 X(:,1) = 1*strcmp(raw{4},'"no"') + 2*strcmp(raw{4},'"yes"');
 X(:,2) = 1*strcmp(raw{5},'"white"') + 2*strcmp(raw{5},'"black"') + 3*strcmp(raw{5},'"other"');
 X(:,3) = 1*strcmp(raw{6},'"no"') + 2*strcmp(raw{6},'"yes"');
 X(:,4) = raw{3};
 X(:,5) = raw{7};
-n = size(Y,1);
-v = size(Y,2);
+n = size(Y,1);                  % number of data points
+v = size(Y,2);                  % number of features
 
 
 %%% Step 2: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify cross-validation
-k = 10;
-V = eye(size(Y,1));
+k  = 10;                        % number of CV folds
+V  = eye(numel(x));             % observation covariance
 
 % Analysis 1: classify smoker, (not) accounting for others
 x1  = X(:,1);
