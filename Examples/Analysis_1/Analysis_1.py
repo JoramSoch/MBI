@@ -11,6 +11,7 @@ Version History:
 - 25/02/2025, 16:14: ported code to Python (Step 1 & 2)
 - 26/02/2025, 11:18: ported code to Python (Step 3)
 - 05/03/2025, 11:01: added to GitHub repository
+- 05/03/2025, 15:21: recoded confusion matrix
 """
 
 
@@ -149,9 +150,7 @@ axs[1,2].axis('off')
 for h in range(len(xt)):
     for g in range(2):
         if g == 0:
-            CM = np.array([[np.mean(MBC[h].xp[MBC[h].xt==j1]==j2) 
-                            for j1 in range(1,nC[h]+1)]
-                            for j2 in range(1,nC[h]+1)])
+            CM = MBC[h].evaluate('CM')
         if g == 1:
             CM = np.array([[np.mean(xp[h][xt[h]==j1]==j2)
                             for j1 in range(1,nC[h]+1)]

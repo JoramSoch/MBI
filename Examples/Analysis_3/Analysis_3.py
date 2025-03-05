@@ -11,6 +11,7 @@ Version History:
 - 27/02/2025, 11:20: ported code to Python (Step 1 & 2)
 - 27/02/2025, 12:16: ported code to Python (Step 3)
 - 05/03/2025, 11:03: added to GitHub repository
+- 05/03/2025, 15:23: recoded confusion matrix
 """
 
 
@@ -185,9 +186,7 @@ for k1 in range(len(x_lab)):
 for h in range(len(xt)):
     for g in range(2):
         if g == 0:
-            CM = np.array([[np.mean(MBC[h].xp[MBC[h].xt==j1]==j2) 
-                            for j1 in range(1,nC[h]+1)]
-                            for j2 in range(1,nC[h]+1)])
+            CM = MBC[h].evaluate('CM')
         if g == 1:
             CM = np.array([[np.mean(xp[h][xt[h]==j1]==j2)
                             for j1 in range(1,nC[h]+1)]

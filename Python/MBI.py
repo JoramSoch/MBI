@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/03/2025, 11:46
+Edited: 05/03/2025, 15:15
 """
 
 
@@ -527,9 +527,13 @@ class cvMBI:
                    o 'CA'  - classification accuracy (default)
                    o 'CAs' - class accuracies
                    o 'BA'  - balanced accuracy
+                   o 'CM'  - confusion matrix
                    or if regression (MBR)
-                   o 'r'   - correlation coefficient (default)
+                   o 'r'   - predictive correlation (default)
+                   o 'R2'  - explained variance
                    o 'MAE' - mean absolute error
+                   o 'MSE' - mean squared error
+                   o 'mn'  - slope and intercept
             
             perf - a scalar, the predictive performance of the model
             
@@ -542,20 +546,32 @@ class cvMBI:
             if self.is_MBC: meas = 'CA'
             else:           meas = 'r'
         
-        # calculate performance
+        # calculate performance (MBC)
         if meas == 'CA':                    # classification accuracy
             perf = np.mean(self.xp==self.xt)
         if meas == 'CAs':                   # class accuracies
             C    = int(np.max(self.xt))
-            perf = np.zeros(C)
-            for j in range(C):
-                perf[j] = np.mean(self.xp[self.xt==(j+1)]==(j+1))
+            perf = np.array([np.mean(self.xp[self.xt==j]==j)
+                             for j in range(1,C+1)])
         if meas == 'BA':                    # balanced accuracy
             perf = np.mean(self.evaluate('CAs'))
-        if meas == 'r':                     # correlation coefficient
+        if meas == 'CM':                    # confusion matrix
+            C    = int(np.max(self.xt))
+            perf = np.array([[np.mean(self.xp[self.xt==j1]==j2) 
+                              for j1 in range(1,C+1)]
+                              for j2 in range(1,C+1)])
+        
+        # calculate performance (MBR)
+        if meas == 'r':                     # predictive correlation
             perf = np.corrcoef(self.xp, self.xt)[0,1]
+        if meas == 'R2':                    # explained variance
+            perf = np.power(self.evaluate('r'), 2)
         if meas == 'MAE':                   # mean absolute error
             perf = np.mean(np.absolute(self.xp-self.xt))
+        if meas == 'MSE':                   # mean squared error
+            perf = np.mean(np.power(self.xp-self.xt, 2))
+        if meas == 'mn':                    # slope and intercept
+            perf = np.polyfit(self.xt, self.xp, 1)
         
         # return performance
         return perf

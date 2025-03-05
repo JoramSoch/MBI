@@ -11,6 +11,7 @@ Version History:
 - 26/02/2025, 13:07: ported code to Python (Step 1 & 2)
 - 26/02/2025, 17:03: ported code to Python (Step 3)
 - 05/03/2025, 11:02: added to GitHub repository
+- 05/03/2025, 15:22: corrected confusion matrix
 """
 
 
@@ -170,10 +171,10 @@ if 3 in steps:
     iC     = [9] + list(range(9))
     PP_max = np.max(PP2, axis=1)
     xp     = np.argmax(PP2, axis=1) + 1
-    CM_MBC = np.array([[np.mean(xp[x2==j1]==j2) for j1 in range(1,nC+1)]
-                                                for j2 in range(1,nC+1)])
-    CM_SVC = np.array([[np.mean(xp[x2==j1]==j2) for j1 in range(1,nC+1)]
-                                                for j2 in range(1,nC+1)])
+    CM_MBC = np.array([[np.mean(xp[x2==j1]==j2)  for j1 in range(1,nC+1)]
+                                                 for j2 in range(1,nC+1)])
+    CM_SVC = np.array([[np.mean(xp2[x2==j1]==j2) for j1 in range(1,nC+1)]
+                                                 for j2 in range(1,nC+1)])
     CM_MBC = CM_MBC[iC,:][:,iC]
     CM_SVC = CM_SVC[iC,:][:,iC]
     
