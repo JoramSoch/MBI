@@ -90,7 +90,10 @@ if 2 in steps:
     del data
     
     # specify analyses
-    N1 = np.concatenate((np.array([1000]), np.arange(2000, x1.size+2000, 2000)))
+    N1 = np.concatenate((np.array(  [600]),
+                         np.arange( 1000, 10000+1000,   1000),
+                         np.arange(12000, 20000+2000,   2000),
+                         np.arange(25000, x1.size+5000, 5000)))
     N2 = np.array([1000, x2.size])
     
     # preallocate results

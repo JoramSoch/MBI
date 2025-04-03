@@ -56,7 +56,7 @@ if ismember(2,steps)
 load('MNIST_data.mat');
 
 % specify analyses
-N1 =[1000, 2000:2000:numel(x1)];
+N1 =[600, 1000:1000:10000, 12000:2000:20000, 25000:5000:numel(x1)];
 N2 =[1000, numel(x2)];
 
 % preallocate results
