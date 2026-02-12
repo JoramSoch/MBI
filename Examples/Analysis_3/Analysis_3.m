@@ -40,10 +40,12 @@ v = size(Y,2);                  % number of features
 
 %%% Step 2: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% specify cross-validation
+% specify SVM analyses
 SVMs={'original', 'features', 'weighted'};
 Stp = 'original';               % SVM to plot
 C   = 1;                        % SVM cost parameter
+
+% specify cross-validation
 k   = 10;                       % number of CV folds
 V   = eye(n);                   % observation covariance
 tA  = 0;

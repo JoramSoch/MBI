@@ -10,6 +10,7 @@
 % - 17/02/2025, 15:25: added decision boundaries
 % - 19/02/2025, 11:49: aligned with Python
 % - 30/01/2026, 17:32: recorded analysis time
+% - 12/02/2026, 17:45: included covariate as feature
 
 
 clear
@@ -43,6 +44,12 @@ c = 1.5*rand(n,1)-0.75;         % c ~ U(-0.75, +0.75)
 c(x==1) = c(x==1) + 0.25;       % x=1 -> -1 < c < 0.5
 c(x==2) = c(x==2) - 0.25;       % x=2 -> -0.5 < c < 1
 X = [X, c];                     % complete design matrix
+
+% specify SVM analyses
+SVMs={'without', 'regression', 'feature'};
+Stp = 'feature';             % SVM to plot
+p   = find(strcmp(SVMs,Stp));   % index of SVM
+
 
 
 %%% Step 2: generate & analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,11 +87,17 @@ SVC(1) = ML_SVC(x, Y, CV, 1, 1, 0);
 tB1    = toc;
 
 % Analysis 4: SVM with prior regression
-tic;
+if p == 2, tic; end;
 Xc     = [c, ones(size(c))];
 Yr     = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
 SVC(2) = ML_SVC(x, Yr, CV, 1, 1, 0);
-tB2    = toc;
+if p == 2, tB2 = toc; end;
+
+% Analysis 5: SVM with covariate as feature
+if p == 3, tic; end;
+Yc     = [Y, c];
+SVC(3) = ML_SVC(x, Yc, CV, 1, 1, 0);
+if p == 3, tB2 = toc; end;
 
 % Analysis 1: decision boundary
 MBA = mbitrain(Y, x, [], V, 'MBC');
@@ -199,16 +212,17 @@ title('SVC w/o correction', 'FontSize', 16);
 
 % plot MBC with prior regression
 subplot(2,3,6); hold on;
-plot(Y(x==1 & SVC(2).pred.xp==1,1), Y(x==1 & SVC(2).pred.xp==1,2), '.r', 'MarkerSize', 10);
-plot(Y(x==2 & SVC(2).pred.xp==1,1), Y(x==2 & SVC(2).pred.xp==1,2), 'sr', 'MarkerSize', 1, 'LineWidth', 2);
-plot(Y(x==1 & SVC(2).pred.xp==2,1), Y(x==1 & SVC(2).pred.xp==2,2), '.b', 'MarkerSize', 10);
-plot(Y(x==2 & SVC(2).pred.xp==2,1), Y(x==2 & SVC(2).pred.xp==2,2), 'sb', 'MarkerSize', 1, 'LineWidth', 2);
+plot(Y(x==1 & SVC(p).pred.xp==1,1), Y(x==1 & SVC(p).pred.xp==1,2), '.r', 'MarkerSize', 10);
+plot(Y(x==2 & SVC(p).pred.xp==1,1), Y(x==2 & SVC(p).pred.xp==1,2), 'sr', 'MarkerSize', 1, 'LineWidth', 2);
+plot(Y(x==1 & SVC(p).pred.xp==2,1), Y(x==1 & SVC(p).pred.xp==2,2), '.b', 'MarkerSize', 10);
+plot(Y(x==2 & SVC(p).pred.xp==2,1), Y(x==2 & SVC(p).pred.xp==2,2), 'sb', 'MarkerSize', 1, 'LineWidth', 2);
 plot(Y_SVC(:,1), Y_SVC(:,2), '-k', 'Color', 0.5*[1,1,1], 'LineWidth', 1);
 axis([-lim, +lim, -lim, +lim]);
 axis square;
 set(gca,'Box','On');
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(2).perf.DA*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(p).perf.DA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
-title('SVC with prior regression', 'FontSize', 16);
+if p == 2, title('SVC with prior regression',     'FontSize', 16); end;
+if p == 3, title('SVC with covariate as feature', 'FontSize', 16); end;
