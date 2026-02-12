@@ -9,6 +9,7 @@
 % - 03/01/2025, 16:57: results visualization
 % - 08/01/2025, 21:44: minor changes & finalization
 % - 26/02/2025, 16:04: aligned with Python
+% - 11/02/2026, 18:00: recorded analysis time
 
 
 clear
@@ -62,6 +63,8 @@ N2 =[1000, numel(x2)];
 % preallocate results
 CA_MBC = zeros(numel(N2),numel(N1));
 CA_SVC = zeros(numel(N2),numel(N1));
+tA     = zeros(numel(N2),numel(N1));
+tB     = zeros(numel(N2),numel(N1));
 fprintf('\n-> Train and test on MNIST data set:\n');
 
 % loop over training data points
@@ -72,14 +75,18 @@ for i = 1:numel(N1)
     fprintf('   - n1 = %d:\n', n1);
     
     % MBC: training
+    tic;
     fprintf('     - training: MBC ... ');
     MBA1 = mbitrain(Y1(1:n1,:), x1(1:n1), [], speye(n1), 'MBC');
     fprintf('successful!\n');
+    tA(:,i) = toc;
     
     % SVC: training
+    tic;
     fprintf('     - training: SVC ... ');
     SVM1 = svmtrain(x1(1:n1), Y1(1:n1,:), '-s 0 -t 0 -c 1 -q');
     fprintf('successful!\n');
+    tB(:,i) = toc;
     
     % loop over test data points
     for j = 1:numel(N2)
@@ -89,17 +96,21 @@ for i = 1:numel(N1)
         fprintf('     - n2 = %d:\n', n2);
         
         % MBC: testing
+        tic;
         fprintf('       - testing: MBC ... ');
         PP2         = mbitest(Y2(1:n2,:), x2(1:n2), [], speye(n2), MBA1, []);
        [PP_max, xp] = max(PP2, [], 2);
         CA_MBC(j,i) = mean(xp==x2(1:n2));
         fprintf('successful!\n');
+        tA(j,i) = tA(j,i) + toc;
         
         % SVC: testing
+        tic;
         fprintf('       - testing: SVC ... ');
         xp2         = svmpredict(x2(1:n2), Y2(1:n2,:), SVM1, '-q');
         CA_SVC(j,i) = mean(xp2==x2(1:n2));
         fprintf('successful!\n');
+        tB(j,i) = tB(j,i) + toc;
         
     end;
     
@@ -108,6 +119,11 @@ end;
 % save analysis results
 fprintf('\n');
 save('MNIST_analysis.mat', 'N1', 'N2', 'MBA1', 'PP2', 'SVM1', 'xp2', 'CA_MBC', 'CA_SVC');
+
+% store analysis time
+time = {'Analysis 2', 'Figure 8A',   sum(tA(end,:)), sum(tB(end,:));
+        'Analysis 2', 'Figure 8B/C', tA(end,end),    tB(end,end)};
+save('Analysis_2.mat', 'time');
 
 end;
 
@@ -294,6 +310,5 @@ for j = 1:nC
     end;
 end;
 clear Y_j PP_j PPj_max PPj_min xp_i pp_i Y_i
-
 
 end;

@@ -8,6 +8,7 @@
 % - 21/02/2022, 19:10: first version
 % - 30/05/2022, 05:33: minor changes
 % - 27/02/2025, 11:27: aligned with Python
+% - 11/02/2026, 16:59: recorded analysis time
 
 
 clear
@@ -38,7 +39,9 @@ v = size(Y,2);                  % number of features
 
 % specify cross-validation
 k  = 10;                        % number of CV folds
-V  = eye(numel(x));             % observation covariance
+V  = eye(n);                    % observation covariance
+tA = 0;
+tB = 0;
 
 % Analysis 1: classify smoker, (not) accounting for others
 x1  = X(:,1);
@@ -49,8 +52,8 @@ X1  = [1*(X(:,2)==1)-1*(X(:,2)==2), 1*(X(:,2)==2)-1*(X(:,2)==3), 1*(X(:,3)==1)-1
 CV1 = ML_CV(x1, k, 'kfc');
 X1r = [X1, ones(n,1)];
 Y1r = (eye(n) - X1r*(X1r'*X1r)^(-1)*X1r')*Y;
-MBC(1) = ML_MBI(Y, x1, X1, V, CV1, 'MBC', []);
-SVC(1) = ML_SVC(x1, Y1r, CV1, 1, 1, 0);
+tic; MBC(1) = ML_MBI(Y, x1, X1, V, CV1, 'MBC', []); tA = tA + toc;
+tic; SVC(1) = ML_SVC(x1, Y1r, CV1, 1, 1, 0);        tB = tB + toc;
 
 % Analysis 2: classify ethnicity, (not) accounting for others
 x2  = X(:,2);
@@ -60,8 +63,8 @@ X2  = [1*(X(:,1)==1)-1*(X(:,1)==2), 1*(X(:,3)==1)-1*(X(:,3)==2), X(:,4:5)];
 CV2 = ML_CV(x2, k, 'kfc');
 X2r = [X2, ones(n,1)];
 Y2r = (eye(n) - X2r*(X2r'*X2r)^(-1)*X2r')*Y;
-MBC(2) = ML_MBI(Y, x2, X2, V, CV2, 'MBC', []);
-SVC(2) = ML_SVC(x2, Y2r, CV2, 1, 1, 0);
+tic; MBC(2) = ML_MBI(Y, x2, X2, V, CV2, 'MBC', []); tA = tA + toc;
+tic; SVC(2) = ML_SVC(x2, Y2r, CV2, 1, 1, 0);        tB = tB + toc;
 
 % Analysis 3: classify hypertension, (not) accounting for others
 x3  = X(:,3);
@@ -72,15 +75,18 @@ X3  = [1*(X(:,1)==1)-1*(X(:,1)==2), 1*(X(:,2)==1)-1*(X(:,2)==2), 1*(X(:,2)==2)-1
 CV3 = ML_CV(x3, 6, 'kfc');
 X3r = [X3, ones(n,1)];
 Y3r = (eye(n) - X3r*(X3r'*X3r)^(-1)*X3r')*Y;
-MBC(3) = ML_MBI(Y, x3, X3, V, CV3, 'MBC', []);
-SVC(3) = ML_SVC(x3, Y3r, CV3, 1, 1, 0);
-
+tic; MBC(3) = ML_MBI(Y, x3, X3, V, CV3, 'MBC', []); tA = tA + toc;
+tic; SVC(3) = ML_SVC(x3, Y3r, CV3, 1, 1, 0);        tB = tB + toc;
 % collect balanced accuracies
 BA = zeros(2,3);
 for h = 1:3
     BA(1,h) = MBC(h).perf.BA;
     BA(2,h) = SVC(h).perf.BA;
 end;
+
+% store analysis time
+time = {'Analysis 3', 'Figure 10B', tA, tB}; 
+save('Analysis_3.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

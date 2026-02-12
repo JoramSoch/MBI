@@ -10,6 +10,7 @@
 % - 05/02/2022, 13:10: scaled linear RGB for better visualization
 % - 17/02/2025, 12:24: linear RGB to sRGB for better visualization
 % - 20/02/2025, 14:57: aligned with Python
+% - 30/01/2026, 17:41: recorded analysis time
 
 
 clear
@@ -59,11 +60,16 @@ n2  = numel(x2);
 
 % Analysis 1: MBC
 MBC = ML_MBI(Y, x, [], V, CV, 'MBC', []);
+tic;
 MBA = mbitrain(Y, x, [], V, 'MBC');
+tA  = toc;
+tAp = tA;
 
 % Analysis 2: SVC
 SVC = ML_SVC(x, Y, CV, 1, 1, 0);
+tic;
 SVM = svmtrain(x, Y, '-s 0 -t 0 -c 1 -q');
+tB  = toc;
 
 % Analysis 1: priors
 CA  = [MBC.perf.CA, SVC.perf.DA];
@@ -89,17 +95,22 @@ for i = 1:numel(xy)
     fprintf('%0.3f, ', xy(i));
     Y2 = [xy(i)*ones(size(xy')), xy'];
     % MBC: posterior probabilities
+    tic;
     pp = mbitest(Y2, x2, [], eye(n2), MBA, []);
     for j = 1:C
         PP(:,i,j) = pp(:,j);
     end;
+    tA = tA + toc;
     % SVC: predicted classes
+    tic;
     xp = svmpredict(x2, Y2, SVM, '-q');
     for j = 1:C
         Xp(xp==j,i,j) = 1;
     end;
+    tB = tB + toc;
     % MBC: modified priors
     prior.x = [1:C];
+    tic;
     for j1 = 1:C
         prior.p     = 1/6*ones(1,C);
         prior.p(j1) = 2/3;
@@ -108,6 +119,7 @@ for i = 1:numel(xy)
             PPp(:,i,j2,j1) = pp(:,j2);
         end;
     end;
+    tAp = tAp + toc;
 end;
 fprintf('done.\n\n');
 clear pp xp prior
@@ -120,6 +132,11 @@ PPp = 12.92*PPp.*(PPp<=thr) + 1.055*(PPp.^(1/2.4)).*(PPp>thr);
 PP  = uint8(PP*255);
 Xp  = uint8(Xp*255);
 PPp = uint8(PPp*255);
+
+% store analysis time
+time = {'Simulation 3', 'Figure 5B/C',   tA,  tB;
+        'Simulation 3', 'Figure 5D/E/F', tAp, NaN}; 
+save('Simulation_3.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

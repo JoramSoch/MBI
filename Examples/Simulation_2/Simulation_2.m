@@ -9,6 +9,7 @@
 % - 30/05/2022, 05:14: minor changes
 % - 17/02/2025, 15:25: added decision boundaries
 % - 19/02/2025, 11:49: aligned with Python
+% - 30/01/2026, 17:32: recorded analysis time
 
 
 clear
@@ -64,18 +65,26 @@ Y2b = [+lim*ones((2*lim)/dxy+1,1), [-lim:dxy:+lim]'];
 x2  = [1, 2*ones(1,size(Y2a,1)-1)]';
 
 % Analysis 1: MBC w/o covariate
+tic;
 MBC(1) = ML_MBI(Y, x, [], V, CV, 'MBC', []);
+tA1    = toc;
 
 % Analysis 2: MBC with covariate
+tic;
 MBC(2) = ML_MBI(Y, x, c, V, CV, 'MBC', []);
+tA2    = toc;
 
 % Analysis 3: SVM w/o covariate
+tic;
 SVC(1) = ML_SVC(x, Y, CV, 1, 1, 0);
+tB1    = toc;
 
 % Analysis 4: SVM with prior regression
-Xc = [c, ones(size(c))];
-Yr = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
+tic;
+Xc     = [c, ones(size(c))];
+Yr     = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
 SVC(2) = ML_SVC(x, Yr, CV, 1, 1, 0);
+tB2    = toc;
 
 % Analysis 1: decision boundary
 MBA = mbitrain(Y, x, [], V, 'MBC');
@@ -94,6 +103,11 @@ xpb = svmpredict(x2, Y2b, SVM, '-q');
 [x_diff, kb] = max(abs(diff(xpb)));
 Y_SVC        = [mean(Y2a(ka:(ka+1),:)); mean(Y2b(kb:(kb+1),:))];
 clear xp_diff ka kb
+
+% store analysis time
+time = {'Simulation 2', 'Figure 4C/E', tA1, tB1;
+        'Simulation 2', 'Figure 4D/F', tA2, tB2}; 
+save('Simulation_2.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

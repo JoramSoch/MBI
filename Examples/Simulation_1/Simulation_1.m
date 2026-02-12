@@ -11,6 +11,7 @@
 %                      corrected CA for s2,
 %                      modified colormap
 % - 18/02/2025, 16:29: aligned with Python
+% - 30/01/2026, 17:18: recorded analysis time
 
 
 clear
@@ -44,6 +45,8 @@ end;
 % specify cross-validation
 CV = ML_CV(x, k, 'kfc');
 CA = zeros(2,numel(mu));
+t1 = 0;
+t2 = 0;
 
 % run simulations
 for h = 1:numel(mu)
@@ -55,8 +58,10 @@ for h = 1:numel(mu)
     Y = X*B + E;
     
     % cross-validated MBC
+    tic;
     MBC(1,h) = ML_MBI(Y, x, [], V, CV, 'MBC', []);
     CA(1,h)  = MBC(1,h).perf.CA;
+    t1       = t1 + toc;
     
     % generate signals (distance fixed)
     B = [-mu(end), +mu(end);
@@ -65,10 +70,17 @@ for h = 1:numel(mu)
     Y = X*B + E;
     
     % cross-validated MBC
+    tic;
     MBC(2,h) = ML_MBI(Y, x, [], V, CV, 'MBC', []);
     CA(2,h)  = MBC(2,h).perf.CA;
+    t2       = t2 + toc;
     
 end;
+
+% store analysis time
+time = {'Simulation 1', 'Figure 3A', t1, NaN;
+        'Simulation 1', 'Figure 3B', t2, NaN}; 
+save('Simulation_1.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

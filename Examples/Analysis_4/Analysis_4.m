@@ -9,6 +9,7 @@
 % - 21/02/2022, 20:29: results visualization
 % - 30/05/2022, 05:50: minor changes & finalization
 % - 28/02/2025, 18:06: aligned with Python
+% - 11/02/2026, 17:19: recorded analysis time
 
 
 clear
@@ -59,16 +60,20 @@ prior(3).x = [0:1:100];
 prior(3).p = gampdf(prior(3).x-y1_min, ab_est(1), ab_est(2));
 
 % Analysis 1: MBR with site/sex as covariates
+tic;
 fprintf('\n-> MBR: train, ');
 MBA1 = mbitrain(YA1, x1, XA1, V1, 'MBR');
+tA   = toc*ones(1,numel(prior));
 PP2  = cell(1,numel(prior));
 xMAP = zeros(n2,numel(prior));
 rA   = zeros(1,numel(prior));
 maeA = zeros(1,numel(prior));
 fprintf('test: prior ');
 for h = 1:numel(prior)
+    tic;
     fprintf('%d, ', h);
     PP2{h} = mbitest(YA2, x2, XA2, V2, MBA1, prior(h));
+    tA(h)  = tA(h) + toc;
     for i = 1:n2
         xMAP(i,h) = prior(h).x(PP2{h}(i,:)==max(PP2{h}(i,:)));
     end;
@@ -78,11 +83,13 @@ end;
 fprintf('done.\n');
 
 % Analysis 2: SVR with site/sex as features
+tic;
 fprintf('-> SVR: train, ');
 SVM1 = svmtrain(x1, YB1, '-s 4 -t 0 -c 1 -q');
 fprintf('test, ');
 xp2  = svmpredict(x2, YB2, SVM1, '-q');
 fprintf('done.\n\n');
+tB   = toc;
 rB   = corr(xp2, x2);
 maeB = mean(abs(xp2-x2));
 
@@ -94,6 +101,12 @@ nbB = hist(xp2,  xb);
 for h = 1:numel(prior)
     nbA(h,:) = hist(xMAP(:,h), xb);
 end;
+
+% store analysis time
+time = {'Analysis 4', 'Figure 11, 2nd/5th',  tA(1), tB;
+        'Analysis 4', 'Figure 11, 3rd col.', tA(2), NaN;
+        'Analysis 4', 'Figure 11, 4th col.', tA(3), NaN;}; 
+save('Analysis_4.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

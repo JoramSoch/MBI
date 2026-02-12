@@ -7,6 +7,7 @@
 % Version History:
 % - 20/02/2022, 22:38: first version
 % - 20/02/2025, 16:48: aligned with Python
+% - 30/01/2026, 17:44: recorded analysis time
 
 
 clear
@@ -50,12 +51,20 @@ Y = X*B + E;
 CV = ML_CV(ones(size(x)), k, 'kf');
 
 % Analysis 1: MBC
+tic;
 prior.x = [-xm:0.01:+xm];
 prior.p = (1/range(prior.x))*ones(size(prior.x));
-MBR = ML_MBI(Y, x, [], V, CV, 'MBR', prior);
+MBR     = ML_MBI(Y, x, [], V, CV, 'MBR', prior);
+tA      = toc;
 
 % Analysis 2: SVM
+tic;
 SVR = ML_SVR(x, Y, CV, 1, 1);
+tB  = toc;
+
+% store analysis time
+time = {'Simulation 4', 'Figure 6B/C', tA, tB}; 
+save('Simulation_4.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

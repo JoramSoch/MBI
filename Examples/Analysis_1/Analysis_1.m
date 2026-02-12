@@ -8,6 +8,7 @@
 % - 21/02/2022, 00:41: first version
 % - 21/02/2022, 17:18: minor changes
 % - 25/02/2025, 14:28: aligned with Python
+% - 11/02/2026, 16:43: recorded analysis time
 
 
 clear
@@ -53,14 +54,22 @@ it{3} = ismember(x,iC{3});
 xt{3} = x(it{3}); xt{3}(xt{3}==5) = 2;
 
 % Analyses 1: MBC
+tic;
 for h = 1:numel(it)
     MBC(h) = ML_MBI(Y(it{h},:), xt{h}, [], V(it{h},it{h}), CV(it{h},:), 'MBC', []);
 end;
+tA = toc;
 
 % Analyses 2: SVM
+tic;
 for h = 1:numel(it)
     SVC(h) = ML_SVC(xt{h}, Y(it{h},:), CV(it{h},:), 1, 1, 0);
 end;
+tB = toc;
+
+% store analysis time
+time = {'Analysis 1', 'Figure 7B', tA, tB}; 
+save('Analysis_1.mat', 'time');
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
