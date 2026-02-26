@@ -66,7 +66,7 @@ xp  = zeros(n,M);
 r   = zeros(1,M);
 MAE = zeros(1,M);
 
-% perform classification
+% perform regression
 for g = 1:size(CV,2)
 
     % get training and test set
@@ -93,7 +93,7 @@ for g = 1:size(CV,2)
             xp2  = prior.x(j);
         end;
         
-        % Method: Gaussian naive Bayes (MATLAB)
+        % Method: Gaussian naive Bayes (custom)
         % https://en.wikipedia.org/wiki/Naive_Bayes_classifier#Probabilistic_model
         if strcmp(meth{h}, 'GNB')
             B_est1  = (X1'*X1)^-1 * X1'*Y1;
@@ -124,7 +124,7 @@ for g = 1:size(CV,2)
             elseif strcmp(Mmlr, 'WLS')
                 b_est1 = (Y1'*P1*Y1)^-1 * Y1'*P1*x1;
             else
-                b_est1 = zeros(size(Y,2),1);
+                b_est1 = zeros(v,1);
             end;
             xp2 = Y2 * b_est1;
         end;
