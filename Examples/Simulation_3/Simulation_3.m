@@ -29,8 +29,8 @@ v  = 2;                         % number of features
 C  = 3;                         % number of classes
 
 % generate classes
-x = [kron([1:C]',ones(n/C,1)), rand(n,1)];
-x = sortrows(x,2);
+x  = [kron([1:C]',ones(n/C,1)), rand(n,1)];
+x  = sortrows(x,2);
 x  = x(:,1);                    % randomized labels
 X  = zeros(n,C);                % design matrix
 V  = eye(n);                    % observation covariance
