@@ -75,7 +75,6 @@ x_SVR  = max(abs(SVR.pred.xp));
 nb_MBR = hist(MBR.pred.xp, xb);
 nb_SVR = hist(SVR.pred.xp, xb);
 
-
 % open figure
 figure('Name', 'Simulation 4', 'Color', [1 1 1], 'Position', [50 50 1600 900]);
 

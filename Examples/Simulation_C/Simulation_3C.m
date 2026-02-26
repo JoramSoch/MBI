@@ -7,14 +7,14 @@
 % Version History:
 % - 20/02/2022, 15:55: first MATLAB version
 % - 20/02/2025, 14:57: final MATLAB version
-% - 26/02/2025, 10:57: added accuracy plot
-% - 26/02/2025, 11:08: rewrote MBC and SVC
-% - 26/02/2025, 11:21: added LDA classification
-% - 26/02/2025, 11:32: added GNB classification
-% - 26/02/2025, 11:43: added LogReg classification
-% - 26/02/2025, 12:01: added RF classification
-% - 26/02/2025, 12:15: added NN classification
-% - 26/02/2025, 12:44: refined accuracy plot
+% - 26/02/2026, 10:57: added performance plot
+% - 26/02/2026, 11:08: rewrote MBC and SVC
+% - 26/02/2026, 11:21: added LDA classification
+% - 26/02/2026, 11:32: added GNB classification
+% - 26/02/2026, 11:43: added LogReg classification
+% - 26/02/2026, 12:01: added RF classification
+% - 26/02/2026, 12:15: added NN classification
+% - 26/02/2026, 12:44: refined performance plot
 
 
 clear
@@ -102,7 +102,7 @@ for g = 1:size(CV,2)
         % Method: Gaussian naive Bayes (MATLAB)
         % https://de.mathworks.com/help/stats/naive-bayes-classification.html
         if strcmp(meth{h}, 'GNB')
-            nbc1 = fitcnb(Y1, x1, 'DistributionNames', Dgnb);
+            nbc1 = fitcnb(Y1, x1, 'DistributionNames', Dgnb, 'Prior', prior.p);
             xp2  = predict(nbc1, Y2);
         end;
         
@@ -156,7 +156,7 @@ for h = 1:M
 end;
 
 
-%%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Step 4: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % open figure
 figure('Name', 'Simulation 3 (Comparison)', 'Color', [1 1 1], 'Position', [50 50 800 900]);
