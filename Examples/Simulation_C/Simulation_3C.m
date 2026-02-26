@@ -64,7 +64,7 @@ Dlda    = 'linear';             % LDA discriminant type
 Llogreg = 'logit';              % LogReg link function
 Mlogreg = 'nominal';            % LogReg model type
 Csvm    = 1;                    % SVM cost parameter
-Mrf     = 'LSBoost';            % RF aggregation method
+Mrf     = 'Bag';                % RF aggregation method
 Lnn     = [10, 10];             % NN hidden layer sizes
 Ann     = 'sigmoid';            % NN activation function
 CV      = ML_CV(x, k, 'kfc');   % k-fold CV on points per class
@@ -131,7 +131,7 @@ for g = 1:size(CV,2)
         % Method: random forrest classification (MATLAB)
         % https://de.mathworks.com/help/stats/select-predictors-for-random-forests.html
         if strcmp(meth{h}, 'RFC')
-            rfe1 = fitrensemble(Y1, x1, 'Method', Mrf);
+            rfe1 = fitcensemble(Y1, x1, 'Method', Mrf);
             xp2  = round(predict(rfe1, Y2));
         end;
 
