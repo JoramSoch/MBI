@@ -8,7 +8,8 @@
 % - 21/02/2022, 01:45: first data analysis
 % - 28/02/2025, 18:06: final figure display
 % - 26/02/2026, 17:13: rewrote for multiple analyses
-% - 26/02/2026, 17:28: added MBR, GNB, MLR, SVR, RFR, NNR
+% - 26/02/2026, 17:28: added MBR, GNB, LinReg, SVR, RFR, NNR
+% - 12/03/2026, 16:32: implemented RGA, changed bar colors
 
 
 clear
@@ -42,12 +43,12 @@ YB2 = [GM2, WM2, c2];
 %%% Step 2: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify analysis parameters
-meth    = {'MBR', 'GNB', 'MLR', 'SVR', 'RFR', 'NNR'};
+meth    = {'GNB', 'MBR', 'LinReg', 'SVR', 'RFR', 'NNR'};
 prior.x = [0:1:100];            % MBR prior distribution
 prior.p = (1/range(prior.x))*ones(size(prior.x));
 Dgnb    = 'mvn';                % GNB distribution name
-Mmlr    = 'WLS';                % MLR estimation method
-Csvm    = 1;                    % SVM cost parameter
+Mlinreg = 'WLS';                % LinReg estimation method
+Csvm    =  1;                   % SVM cost parameter
 Mrf     = 'Bag';                % RF aggregation method
 Lnn     = [size(YB1,2)];        % NN hidden layer sizes
 Ann     = 'none';               % NN activation function
@@ -57,6 +58,7 @@ M   = numel(meth);
 xp  = zeros(n2,M);
 r   = zeros( 1,M);
 MAE = zeros( 1,M);
+RGA = zeros( 1,M);
 
 % evaluate all methods
 for h = 1:M
@@ -94,11 +96,11 @@ for h = 1:M
     
     % Method: multiple linear regression (MACS)
     % https://github.com/JoramSoch/MACS/blob/master/ME_GLM.m
-    if strcmp(meth{h}, 'MLR')
+    if strcmp(meth{h}, 'LinReg')
         P1  = inv(V1);
-        if strcmp(Mmlr, 'OLS')
+        if strcmp(Mlinreg, 'OLS')
             b_est1 = (YB1'*YB1)^-1 * YB1'*x1;
-        elseif strcmp(Mmlr, 'WLS')
+        elseif strcmp(Mlinreg, 'WLS')
             b_est1 = (YB1'*P1*YB1)^-1 * YB1'*P1*x1;
         else
             b_est1 = zeros(size(YB1,2),1);
@@ -124,14 +126,15 @@ for h = 1:M
     % Method: neural network regression (MATLAB)
     % https://de.mathworks.com/help/stats/classificationneuralnetwork.html
     if strcmp(meth{h}, 'NNR')
-        nn1 = fitrnet(YB1, x1, 'LayerSizes', Lnn, 'Activations', Ann);
-        xp2 = predict(nn1, YB2);
+        nn1  = fitrnet(YB1, x1, 'LayerSizes', Lnn, 'Activations', Ann);
+        xp2  = predict(nn1, YB2);
     end;
     
     % calculate performance
     xp(:,h) = xp2;
     r(h)    = corr(xp(:,h), x2);
     MAE(h)  = mean(abs(xp(:,h)-x2));
+    RGA(h)  = ML_RGA(x2, xp(:,h), 'RGA');
     
 end;
 fprintf('\n\n');
@@ -142,25 +145,48 @@ clear mba1 B_est1 s2_est Si_est1 b_est1 svm1 rfe1 nn1
 
 % open figure
 figure('Name', 'Analysis 4 (Comparison)', 'Color', [1 1 1], 'Position', [50 50 800 900]);
-cols  = 'bcmryw';
+cols  = [  0,  32,  96;
+           0,   0, 255;
+         192,   0,   0;
+         255,   0,   0;
+         255, 192,   0;
+         255, 255,   0];
 x_off = 2;
-y_off = 0.95;
+y_off = 0.975;
 hold on;
 
 % plot performance
 for h = 1:M
-    bar(h, r(h), 0.7, cols(h));
+    bar(h, RGA(h), 0.7, 'FaceColor', cols(h,:)./255);
 end;
-plot([(1-1), (M+2)], [0, 0], ':k', 'LineWidth', 2);
+plot([(1-1), (M+2)], [0.5, 0.5], ':k', 'LineWidth', 2);
 plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
 axis([(1-1), (M+2), 0, 1]);
 set(gca,'Box','On');
 set(gca,'XTick',[1:M],'XTickLabel',meth);
 legend([meth, {'chance'}], 'Location', 'NorthEast');
 xlabel('regression approach', 'FontSize', 16);
-ylabel('predictive correlation', 'FontSize', 16);
+ylabel('rank graduation accuracy', 'FontSize', 16);
 title('Analysis 4: Comparison', 'FontSize', 24);
-text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
+text(x_off+1/2, y_off, sprintf('generative methods '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
-text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
+text(x_off+1/2, y_off, sprintf(' discriminative methods'), ...
      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
+
+% plot performance
+% for h = 1:M
+%     bar(h, r(h), 0.7, 'FaceColor', cols(h,:)./255);
+% end;
+% plot([(1-1), (M+2)], [0, 0], ':k', 'LineWidth', 2);
+% plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
+% axis([(1-1), (M+2), 0, 1]);
+% set(gca,'Box','On');
+% set(gca,'XTick',[1:M],'XTickLabel',meth);
+% legend([meth, {'chance'}], 'Location', 'NorthEast');
+% xlabel('regression approach', 'FontSize', 16);
+% ylabel('predictive correlation', 'FontSize', 16);
+% title('Analysis 4: Comparison', 'FontSize', 24);
+% text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
+% text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');

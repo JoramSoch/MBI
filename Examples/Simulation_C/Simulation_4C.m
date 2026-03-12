@@ -9,9 +9,11 @@
 % - 20/02/2025, 16:48: final MATLAB version
 % - 26/02/2026, 13:02: added performance plot
 % - 26/02/2026, 14:02: rewrote MBR and SVR
-% - 26/02/2026, 14:32: added MLR, RFR, NNR
+% - 26/02/2026, 14:32: added LinReg, RFR, NNR
 % - 26/02/2026, 15:32: added GNB regression
 % - 26/02/2026, 15:44: refined performance plot
+% - 12/03/2026, 16:18: implemented RGA measure
+% - 12/03/2026, 16:23: changed bar color scheme
 
 
 clear
@@ -49,12 +51,12 @@ Y = X*B + E;
 %%% Step 3: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify analysis parameters
-meth    = {'MBR', 'GNB', 'MLR', 'SVR', 'RFR', 'NNR'};
+meth    = {'GNB', 'MBR', 'LinReg', 'SVR', 'RFR', 'NNR'};
 prior.x = [-xm:0.01:+xm];       % MBR prior distribution
 prior.p = (1/range(prior.x))*ones(size(prior.x));
 Dgnb    = 'mvn';                % GNB distribution name
-Mmlr    = 'WLS';                % MLR estimation method
-Csvm    = 1;                    % SVM cost parameter
+Mlinreg = 'WLS';                % LinReg estimation method
+Csvm    =  1;                   % SVM cost parameter
 Mrf     = 'Bag';                % RF aggregation method
 Lnn     = [10, 10];             % NN hidden layer sizes
 Ann     = 'none';               % NN activation function
@@ -65,6 +67,7 @@ M   = numel(meth);
 xp  = zeros(n,M);
 r   = zeros(1,M);
 MAE = zeros(1,M);
+RGA = zeros(1,M);
 
 % perform regression
 for g = 1:size(CV,2)
@@ -117,11 +120,11 @@ for g = 1:size(CV,2)
         
         % Method: multiple linear regression (MACS)
         % https://github.com/JoramSoch/MACS/blob/master/ME_GLM.m
-        if strcmp(meth{h}, 'MLR')
+        if strcmp(meth{h}, 'LinReg')
             P1  = inv(V1);
-            if strcmp(Mmlr, 'OLS')
+            if strcmp(Mlinreg, 'OLS')
                 b_est1 = (Y1'*Y1)^-1 * Y1'*x1;
-            elseif strcmp(Mmlr, 'WLS')
+            elseif strcmp(Mlinreg, 'WLS')
                 b_est1 = (Y1'*P1*Y1)^-1 * Y1'*P1*x1;
             else
                 b_est1 = zeros(v,1);
@@ -163,6 +166,7 @@ end;
 for h = 1:M
     r(h)   = corr(xp(:,h), x);
     MAE(h) = mean(abs(xp(:,h)-x));
+    RGA(h) = ML_RGA(x, xp(:,h), 'RGA');
 end;
 
 
@@ -170,25 +174,48 @@ end;
 
 % open figure
 figure('Name', 'Simulation 4 (Comparison)', 'Color', [1 1 1], 'Position', [50 50 800 900]);
-cols  = 'bcmryw';
+cols  = [  0,  32,  96;
+           0,   0, 255;
+         192,   0,   0;
+         255,   0,   0;
+         255, 192,   0;
+         255, 255,   0];
 x_off = 2;
-y_off = 0.925;
+y_off = 0.965;
 hold on;
 
 % plot performance
 for h = 1:M
-    bar(h, r(h), 0.7, cols(h));
+    bar(h, RGA(h), 0.7, 'FaceColor', cols(h,:)./255);
 end;
-plot([(1-1), (M+2)], [0, 0], ':k', 'LineWidth', 2);
+plot([(1-1), (M+2)], [0.5, 0.5], ':k', 'LineWidth', 2);
 plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
 axis([(1-1), (M+2), 0, 1]);
 set(gca,'Box','On');
 set(gca,'XTick',[1:M],'XTickLabel',meth);
 legend([meth, {'chance'}], 'Location', 'NorthEast');
 xlabel('regression approach', 'FontSize', 16);
-ylabel('predictive correlation', 'FontSize', 16);
+ylabel('rank graduation accuracy', 'FontSize', 16);
 title('Simulation 4: Comparison', 'FontSize', 24);
 text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
 text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
+
+% plot performance
+% for h = 1:M
+%     bar(h, r(h), 0.7, 'FaceColor', cols(h,:)./255);
+% end;
+% plot([(1-1), (M+2)], [0, 0], ':k', 'LineWidth', 2);
+% plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
+% axis([(1-1), (M+2), 0, 1]);
+% set(gca,'Box','On');
+% set(gca,'XTick',[1:M],'XTickLabel',meth);
+% legend([meth, {'chance'}], 'Location', 'NorthEast');
+% xlabel('regression approach', 'FontSize', 16);
+% ylabel('predictive correlation', 'FontSize', 16);
+% title('Simulation 4: Comparison', 'FontSize', 24);
+% text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
+% text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');

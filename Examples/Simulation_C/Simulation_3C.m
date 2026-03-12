@@ -15,6 +15,8 @@
 % - 26/02/2026, 12:01: added RF classification
 % - 26/02/2026, 12:15: added NN classification
 % - 26/02/2026, 12:44: refined performance plot
+% - 12/03/2026, 15:42: implemented RGA measure
+% - 12/03/2026, 15:51: changed bar color scheme
 
 
 clear
@@ -56,23 +58,25 @@ Y = X*B + E;
 %%% Step 3: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % specify analysis parameters
-meth    = {'MBC', 'GNB', 'LDA', 'LogReg', 'SVC', 'RFC', 'NNC'};
+meth    = {'GNB', 'MBC', 'LDA', 'LogReg', 'SVC', 'RFC', 'NNC'};
 prior.x = [1:C];                % MBC class indices
 prior.p = 1/C*ones(1,C);        % MBC prior probabilities
 Dgnb    = 'normal';             % GNB distribution name
 Dlda    = 'linear';             % LDA discriminant type
-Llogreg = 'logit';              % LogReg link function
-Mlogreg = 'nominal';            % LogReg model type
-Csvm    = 1;                    % SVM cost parameter
+Llogreg =  1;                   % LogReg cost parameter
+Ksvm    = 'linear';             % SVM kernel type
+Csvm    =  1;                   % SVM cost parameter
 Mrf     = 'Bag';                % RF aggregation method
 Lnn     = [10, 10];             % NN hidden layer sizes
 Ann     = 'sigmoid';            % NN activation function
 CV      = ML_CV(x, k, 'kfc');   % k-fold CV on points per class
 
 % preallocate results
-M  = numel(meth);
-xp = zeros(n,M);
-CA = zeros(1,M);
+M   = numel(meth);
+xp  = zeros(n,M);
+xs  = zeros(n,C,M);
+CA  = zeros(1,M);
+RGA = zeros(1,M);
 
 % perform classification
 for g = 1:size(CV,2)
@@ -97,53 +101,65 @@ for g = 1:size(CV,2)
             pp2  = mbitest(Y2, x2, [], V2, mba1, prior);
             [m,j]= max(pp2, [], 2);
             xp2  = prior.x(j);
+            xs2  = pp2;
         end;
         
         % Method: Gaussian naive Bayes (MATLAB)
         % https://de.mathworks.com/help/stats/naive-bayes-classification.html
         if strcmp(meth{h}, 'GNB')
-            nbc1 = fitcnb(Y1, x1, 'DistributionNames', Dgnb, 'Prior', prior.p);
-            xp2  = predict(nbc1, Y2);
+            nbc1      = fitcnb(Y1, x1, 'DistributionNames', Dgnb, 'Prior', prior.p);
+           [xp2, xs2] = predict(nbc1, Y2);
         end;
         
         % Method: linear discriminant analysis (MATLAB)
         % https://de.mathworks.com/help/stats/discriminant-analysis.html
         if strcmp(meth{h}, 'LDA')
-            lda1 = fitcdiscr(Y1, x1, 'DiscrimType', Dlda);
-            xp2  = predict(lda1, Y2);
+            lda1      = fitcdiscr(Y1, x1, 'DiscrimType', Dlda);
+           [xp2, xs2] = predict(lda1, Y2);
         end;
         
-        % Method: multinomial logistic regression (MATLAB)
-        % https://de.mathworks.com/help/stats/fitmnr.html
+        % Method: multiclass logistic regression (MATLAB)
+        % https://de.mathworks.com/help/stats/classificationecoc.html
         if strcmp(meth{h}, 'LogReg')
-            logreg1 = fitmnr(Y1, x1, 'Link', Llogreg, 'ModelType', Mlogreg);
-            xp2     = predict(logreg1, Y2);
+            Tlogreg   = templateLinear('Learner', 'logistic', 'Lambda', Llogreg);
+            logreg1   = fitcecoc(Y1, x1, 'Learners', Tlogreg);
+           [xp2, xs2] = predict(logreg1, Y2);
+        end;
+        
+        % Method: support vector classification (MATLAB)
+        % https://de.mathworks.com/help/stats/classificationecoc.html
+        if strcmp(meth{h}, 'SVC')
+            Tsvm      = templateSVM('KernelFunction', Ksvm, 'BoxConstraint', Csvm);
+            svm1      = fitcecoc(Y1, x1, 'Learners', Tsvm);
+           [xp2, xs2] = predict(svm1, Y2);
         end;
         
         % Method: support vector classification (LibSVM)
         % https://github.com/JoramSoch/ML4ML/blob/main/ML_SVC.m
-        if strcmp(meth{h}, 'SVC')
-            opt  = sprintf('-s 0 -t 0 -c %s -q', num2str(Csvm));
-            svm1 = svmtrain(x1, Y1, opt);
-            xp2  = svmpredict(x2, Y2, svm1, '-q');
-        end;
-
+        % if strcmp(meth{h}, 'SVC')
+        %     opt  = sprintf('-s 0 -t 0 -c %s -q', num2str(Csvm));
+        %     svm1 = svmtrain(x1, Y1, opt);
+        %     xp2  = svmpredict(x2, Y2, svm1, '-q');
+        %     xs2  = Y2 * (svm1.sv_coef' * svm1.SVs)' + (-svm1.rho)
+        % end;
+        
         % Method: random forrest classification (MATLAB)
         % https://de.mathworks.com/help/stats/select-predictors-for-random-forests.html
         if strcmp(meth{h}, 'RFC')
-            rfe1 = fitcensemble(Y1, x1, 'Method', Mrf);
-            xp2  = round(predict(rfe1, Y2));
+            rfe1      = fitcensemble(Y1, x1, 'Method', Mrf);
+           [xp2, xs2] = predict(rfe1, Y2);
         end;
-
+        
         % Method: neural network classification (MATLAB)
         % https://de.mathworks.com/help/stats/classificationneuralnetwork.html
         if strcmp(meth{h}, 'NNC')
-            nn1 = fitcnet(Y1, x1, 'LayerSizes', Lnn, 'Activations', Ann);
-            xp2 = predict(nn1, Y2);
+            nn1       = fitcnet(Y1, x1, 'LayerSizes', Lnn, 'Activations', Ann);
+           [xp2, xs2] = predict(nn1, Y2);
         end;
         
         % store test set predictions
-        xp(i2,h) = xp2;
+        xp(i2,h)   = xp2;
+        xs(i2,:,h) = xs2;
         
     end;
     clear mba1 nbc1 lda1 logreg1 svm1 rfe1 nn1
@@ -152,7 +168,8 @@ end;
 
 % calculate performance
 for h = 1:M
-    CA(h) = mean(xp(:,h)==x);
+    CA(h)  = mean(xp(:,h)==x);
+    RGA(h) = ML_RGA(x, xs(:,:,h), 'macro');
 end;
 
 
@@ -160,25 +177,49 @@ end;
 
 % open figure
 figure('Name', 'Simulation 3 (Comparison)', 'Color', [1 1 1], 'Position', [50 50 800 900]);
-cols  = 'bcgmryw';
+cols  = [  0,  32,  96;
+           0,   0, 255;
+           0, 176, 240;
+         192,   0,   0;
+         255,   0,   0;
+         255, 192,   0;
+         255, 255,   0];
 x_off = 3;
-y_off = 0.9;
+y_off = 0.925;
 hold on;
 
 % plot performance
 for h = 1:M
-    bar(h, CA(h), 0.7, cols(h));
+    bar(h, RGA(h), 0.7, 'FaceColor', cols(h,:)./255);
 end;
-plot([(1-1), (M+1)], [1/C, 1/C], ':k', 'LineWidth', 2);
+plot([(1-1), (M+1)], [1/2, 1/2], ':k', 'LineWidth', 2);
 plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
 axis([(1-1), (M+1), 0, 1]);
 set(gca,'Box','On');
 set(gca,'XTick',[1:M],'XTickLabel',meth);
 legend([meth, {'chance'}], 'Location', 'NorthEast');
 xlabel('classification approach', 'FontSize', 16);
-ylabel('classification accuracy', 'FontSize', 16);
+ylabel('rank graduation accuracy', 'FontSize', 16);
 title('Simulation 3: Comparison', 'FontSize', 24);
 text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
 text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
+
+% plot performance
+% for h = 1:M
+%     bar(h, CA(h), 0.7, 'FaceColor', cols(h,:)./255);
+% end;
+% plot([(1-1), (M+1)], [1/C, 1/C], ':k', 'LineWidth', 2);
+% plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
+% axis([(1-1), (M+1), 0, 1]);
+% set(gca,'Box','On');
+% set(gca,'XTick',[1:M],'XTickLabel',meth);
+% legend([meth, {'chance'}], 'Location', 'NorthEast');
+% xlabel('classification approach', 'FontSize', 16);
+% ylabel('classification accuracy', 'FontSize', 16);
+% title('Simulation 3: Comparison', 'FontSize', 24);
+% text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
+% text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
+%      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
