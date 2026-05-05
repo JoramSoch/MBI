@@ -21,9 +21,12 @@ function PP = mbitest_nl(Y, x, X, V, deg, MBA, prior)
 % from features Y, accounting for covariates X and covariance V and using
 % polynomial expansion of degree deg.
 % 
-% Author: Joram Soch, BCCN Berlin
+% Author: Joram Soch, OvGU Magdeburg
 % E-Mail: joram.soch@ovgu.de
-% Edited: 17/06/2025, 12:46
+% 
+% Version History:
+% - 2025-06-17, 12:46: first version
+% - 2026-05-05, 12:33: minor changes
 
 
 % Set inputs if required
@@ -75,8 +78,8 @@ V2 = V;
 
 % Get data dimensions
 %-------------------------------------------------------------------------%
-n = size(Y2,1);
-v = size(Y2,2);
+n  = size(Y2,1);
+v  = size(Y2,2);
 
 % Specify prior parameters
 %-------------------------------------------------------------------------%

@@ -31,9 +31,16 @@ function MBA = mbitrain(Y, x, X, V, type)
 % model for classification or regression of classes or targets x from
 % features Y, accounting for covariates X and covariance V.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 05/05/2026, 10:24
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2022-02-20, 08:50: first version
+% - 2022-07-06, 15:59: added documentation
+% - 2022-07-14, 17:31: exported prior to separate function
+% - 2022-08-11, 15:41: optimized input argument checks
+% - 2024-12-20, 09:12: corrected one minor error
+% - 2026-05-05, 10:24: changed order of regressors for MBR
 
 
 % Set inputs if required

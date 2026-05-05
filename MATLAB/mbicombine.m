@@ -33,7 +33,9 @@ function MBA = mbicombine(MBAs, prior)
 % 
 % Author: Joram Soch, OvGU Magdeburg
 % E-Mail: joram.soch@ovgu.de
-% Edited: 15/04/2025, 14:47
+% 
+% Version History:
+% - 2025-04-15, 14:47: first version
 
 
 % Set inputs if required

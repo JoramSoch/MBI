@@ -33,9 +33,12 @@ function MBA = mbitrain_nl(Y, x, X, V, deg, type)
 % from features Y, accounting for covariates X and covariance V and using
 % polynomial expansion of degree deg.
 % 
-% Author: Joram Soch, BCCN Berlin
+% Author: Joram Soch, OvGU Magdeburg
 % E-Mail: joram.soch@ovgu.de
-% Edited: 17/06/2025, 12:17
+% 
+% Version History:
+% - 2025-06-17, 12:17: first version
+% - 2026-05-05, 12:32: minor changes
 
 
 % Set inputs if required
@@ -99,9 +102,9 @@ P1 = inv(V);
 
 % Get data dimensions
 %-------------------------------------------------------------------------%
-n = size(Y1,1);
-v = size(Y1,2);
-p = size(X1,2);
+n  = size(Y1,1);
+v  = size(Y1,2);
+p  = size(X1,2);
 
 % Specify prior parameters
 %-------------------------------------------------------------------------%

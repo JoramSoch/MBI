@@ -18,9 +18,11 @@ function prior = uniprior(type, L, x_min, x_max)
 % if type is 'disc' (discrete random variable) or L possible values between
 % and including x_min and x_max, if type is 'cont'.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 14/07/2022, 17:18
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2022-07-22, 17:18: first version
 
 
 % Set default values, if necessary

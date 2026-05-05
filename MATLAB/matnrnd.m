@@ -22,9 +22,12 @@ function R = matnrnd(M,U,V,c,A,B)
 % [1] Wikipedia: "Matrix normal distribution";
 %     URL: https://en.wikipedia.org/wiki/Matrix_normal_distribution.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 06/03/2020, 15:23
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2020-03-06, 15:23: first version
+% - 2022-07-06, 15:59: added documentation
 
 
 % Set number of cases if necessary

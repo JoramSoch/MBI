@@ -46,9 +46,22 @@ function MBI = ML_MBI(Y, x, X, V, CV, type, prior)
 % according to CV and then performs multivariate Bayesian inversion for
 % classification into categories or regression on targets.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 05/03/2025, 11:23
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2022-02-20, 10:58: first version
+% - 2022-11-05, 15:53: corrected documentation,
+%                      corrected matrix creation command
+% - 2022-07-06, 15:59: added detailed info to function
+% - 2022-07-14, 17:31: exported prior to separate function
+% - 2022-08-11, 15:41: optimized input argument checks
+% - 2024-12-05, 15:18: commented command window output,
+%                      improved ML estimate identification,
+%                      corrected MBR performance assessment
+% - 2025-03-05, 11:44: replaced "decoding accuracy"/"DA" by "classification accuracy"/"CA",
+%                      replaced "class accuracies"/"CA" by "CAs" in variable names
+% - 2025-03-05, 19:03: minor changes
 
 
 % Set inputs if required

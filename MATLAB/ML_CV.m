@@ -25,9 +25,14 @@ function CV = ML_CV(c, k, mode)
 % - 'looc' requires that all classes are equally large;
 %    if this is not fulfilled, mode is set to 'loo'.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 02/08/2021, 15:02
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2021-07-06, 13:14: first version
+% - 2021-08-02, 15:02: minor changes
+% - 2022-07-06, 15:59: added documentation
+% - 2022-07-06, 16:27: reverted to ML4ML version
 
 
 % Set defaults values

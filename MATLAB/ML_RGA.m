@@ -32,7 +32,9 @@ function RGA = ML_RGA(x, xs, mode)
 % 
 % Author: Joram Soch, OvGU Magdeburg
 % E-Mail: joram.soch@ovgu.de
-% Edited: 12/03/2026, 11:32
+% 
+% Version History:
+% - 2025-03-12, 11:32: first version
 
 
 % Set defaults values

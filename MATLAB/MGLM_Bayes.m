@@ -28,9 +28,11 @@ function [Mn, Ln, On, vn] = MGLM_Bayes(Y, X, P, M0, L0, O0, v0)
 % [2] Soch J (2020): "Posterior distribution for multivariate Bayesian linear regression";
 %     URL: https://statproofbook.github.io/P/mblr-post.
 % 
-% Author: Joram Soch, BCCN Berlin
-% E-Mail: joram.soch@bccn-berlin.de
-% Edited: 20/02/2022, 09:54
+% Author: Joram Soch, OvGU Magdeburg
+% E-Mail: joram.soch@ovgu.de
+% 
+% Version History:
+% - 2022-02-20, 09:54: first version
 
 
 % Get model dimensions

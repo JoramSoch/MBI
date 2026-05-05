@@ -49,9 +49,12 @@ function MBI = ML_MBI_nl(Y, x, X, V, CV, deg, type, prior)
 % with polynomial expansion order deg for classification into categories
 % or regression on targets.
 % 
-% Author: Joram Soch, BCCN Berlin
+% Author: Joram Soch, OvGU Magdeburg
 % E-Mail: joram.soch@ovgu.de
-% Edited: 17/06/2025, 13:02
+% 
+% Version History:
+% - 2025-06-17, 13:02: first version
+% - 2026-05-05, 12:34: minor changes
 
 
 % Set inputs if required
