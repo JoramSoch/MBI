@@ -148,8 +148,8 @@ for h = 1:3
 end;
 
 % store analysis time
-time = {'Analysis 3', 'Figure 10B', tA, tB}; 
-save('Analysis_3.mat', 'time');
+time = {'Analysis 3', 'Figure 10B', tA, tB};
+if strcmp(Stp,'original'), save('Analysis_3.mat', 'time'); end;
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

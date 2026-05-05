@@ -47,7 +47,7 @@ X = [X, c];                     % complete design matrix
 
 % specify SVM analyses
 SVMs={'without', 'regression', 'feature'};
-Stp = 'feature';             % SVM to plot
+Stp = 'regression';             % SVM to plot
 p   = find(strcmp(SVMs,Stp));   % index of SVM
 
 
@@ -119,8 +119,8 @@ clear xp_diff ka kb
 
 % store analysis time
 time = {'Simulation 2', 'Figure 4C/E', tA1, tB1;
-        'Simulation 2', 'Figure 4D/F', tA2, tB2}; 
-save('Simulation_2.mat', 'time');
+        'Simulation 2', 'Figure 4D/F', tA2, tB2};
+if strcmp(Stp,'regression'), save('Simulation_2.mat', 'time'); end;
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

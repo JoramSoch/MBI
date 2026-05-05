@@ -137,7 +137,6 @@ for h = 1:M
     RGA(h)  = ML_RGA(x2, xp(:,h), 'RGA');
     
 end;
-fprintf('\n\n');
 clear mba1 B_est1 s2_est Si_est1 b_est1 svm1 rfe1 nn1
 
 
@@ -163,11 +162,11 @@ plot([(1-1), (M+2)], [0.5, 0.5], ':k', 'LineWidth', 2);
 plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
 axis([(1-1), (M+2), 0, 1]);
 set(gca,'Box','On');
-set(gca,'XTick',[1:M],'XTickLabel',meth);
+set(gca,'XTick',[]);
 legend([meth, {'chance'}], 'Location', 'NorthEast');
 xlabel('regression approach', 'FontSize', 16);
 ylabel('rank graduation accuracy', 'FontSize', 16);
-title('Analysis 4: Comparison', 'FontSize', 24);
+title('Analysis 4', 'FontSize', 24);
 text(x_off+1/2, y_off, sprintf('generative methods '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
 text(x_off+1/2, y_off, sprintf(' discriminative methods'), ...
