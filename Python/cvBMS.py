@@ -27,9 +27,19 @@ So far, the following model structures are available:
 - MGLM  = multivariate general linear model; for multivariate regression
 - Poiss = Poisson distribution with exposures; for count data
 
-Author: Joram Soch, BCCN Berlin
-E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/03/2025, 16:01
+Author: Joram Soch, OvGU Magdeburg
+E-Mail: joram.soch@ovgu.de
+
+Version History:
+- 2019-02-21, 08:28: added model "MS"
+- 2019-02-21, 12:33: added model "GLM"
+- 2019-02-21, 15:44: added model "Poiss"
+- 2022-03-31, 10:07: added model "MGLM"
+- 2022-04-21, 16:05: corrected matrix creation command
+- 2022-04-27, 14:30: speeded up MGLM estimation
+- 2022-07-06, 14:18: added detailed documentation to module
+- 2025-02-28, 11:40: enabled sparse covariance matrix
+- 2025-03-05, 16:01: enabled i.i.d. observations
 """
 
 

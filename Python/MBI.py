@@ -30,9 +30,29 @@ Additionally, the module contains two functions:
 For more information, see the usage examples in the readme file:
   https://github.com/JoramSoch/MBI/blob/main/README.md
 
-Author: Joram Soch, BCCN Berlin
-E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/05/2026, 11:35
+Author: Joram Soch, OvGU Magdeburg
+E-Mail: joram.soch@ovgu.de
+
+Version History:
+- 2022-03-31, 10:07: added model, model.train, model.test
+- 2022-04-04, 20:56: added cvMBI, cvMBI.crossval, cvMBI.predict, cvMBI.evaluate
+- 2022-04-12, 21:27: added matnrnd, uniprior,
+                     inherited model from cvBMS.MGLM,
+                     debugged model.test, cvBMI.crossval, cvMBI.predict
+- 2022-04-21, 16:05: debugged model.train, cvBMI.predict, cvMBI.evaluate
+- 2022-04-27, 14:30: improved log-determinant calculation in mode.test
+- 2022-05-20, 18:08: added custom options to cvMBI.crossval
+- 2022-07-06, 14:15: added detailed documentation to module
+- 2022-07-06, 16:06: corrected typos and reformulated commands
+- 2022-12-05, 15:26: improved ML estimate identification
+- 2025-02-28, 11:40: optimized MBR posterior calculation
+- 2025-03-05, 11:44: replaced "decoding accuracy"/"DA" by "classification accuracy"/"CA",
+                     replaced "class accuracies"/"CA" by "CAs" in variable names
+- 2025-03-05, 11:58: optimized matrix-normal sampling function
+- 2025-03-05, 15:29: added more measures to cvMBI.evaluate
+- 2025-03-05, 18:28: enabled sparse covariance matrix
+- 2025-03-05, 19:03: replaced double quotation marks
+- 2026-05-05, 11:35: changed order of regressors for MBR
 """
 
 
