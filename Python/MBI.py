@@ -32,7 +32,7 @@ For more information, see the usage examples in the readme file:
 
 Author: Joram Soch, BCCN Berlin
 E-Mail: joram.soch@bccn-berlin.de
-Edited: 05/03/2025, 18:53
+Edited: 05/05/2026, 11:35
 """
 
 
@@ -170,7 +170,7 @@ class model(cvBMS.MGLM):
             for i in range(n):
                 Xx[i,int(x[i]-1)] = 1
         elif mb_type == 'MBR':              # regression
-            Xx = np.c_[x, np.ones((Y.shape[0],1))]
+            Xx = np.c_[np.ones((Y.shape[0],1)), x]
         if X is None: X = np.zeros((Y.shape[0],0))
         
         # store model information
@@ -271,7 +271,7 @@ class model(cvBMS.MGLM):
                     x2ij[0,:L] = 0
                     x2ij[0,j]  = 1
                 else:                       # regression -> parametric
-                    x2ij[0,0]  = prior['x'][j]
+                    x2ij[0,1]  = prior['x'][j]
                 # specify model assuming that the label = x for this point
                 mij            = cvBMS.MGLM(y2i, x2ij, vii)
                 M2, L2, O2, v2 = mij.Bayes(M1, L1, O1, v1)
@@ -420,7 +420,7 @@ class cvMBI:
                 CV[i1,g] = 1
                 CV[i2,g] = 2
         
-        # cross-validation points per class
+        # cross-validation on points per class
         if cv_mode == 'kfc' or cv_mode == 'looc':
             nf = np.ceil(nc/k)
             ia = np.arange(0,n)

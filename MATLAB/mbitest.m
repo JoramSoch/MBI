@@ -21,7 +21,7 @@ function PP = mbitest(Y, x, X, V, MBA, prior)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 28/02/2025, 10:13
+% Edited: 05/05/2026, 11:10
 
 
 % Set inputs if required
@@ -48,15 +48,15 @@ if MBA.is_MBC
     C  = max(x);
     X2 = zeros(size(Y2,1),C);
 else
-    X2 = [zeros(size(x)), ones(size(x))];
+    X2 = [ones(size(x)), zeros(size(x))];
 end;
 X2 = [X2, X];
 V2 = V;
 
 % Get data dimensions
 %-------------------------------------------------------------------------%
-n = size(Y2,1);
-v = size(Y2,2);
+n  = size(Y2,1);
+v  = size(Y2,2);
 
 % Specify prior parameters
 %-------------------------------------------------------------------------%
@@ -77,9 +77,9 @@ for i = 1:n                     % loop over data points in the test set
     for j = find(prior.p)       % loop over label values (where prior is non-zero)
         x2ij = x2i;
         if MBA.is_MBC           % classification -> categorical
-            x2ij(j)   = 1;
+            x2ij(j)  = 1;
         else                    % regression -> parametric
-            x2ij(1)   = prior.x(j);
+            x2ij(2)  = prior.x(j);
         end;                    % calculte posterior parameters
         [M2, L2, O2, v2] = MGLM_Bayes(y2i, x2ij, pii, M1, L1, O1, v1);
         logPP(i,j)       = -v/2 * logdet(L2) - v2/2 * logdet(O2) + log(prior.p(j));

@@ -33,7 +33,7 @@ function MBA = mbitrain(Y, x, X, V, type)
 % 
 % Author: Joram Soch, BCCN Berlin
 % E-Mail: joram.soch@bccn-berlin.de
-% Edited: 14/07/2022, 17:20
+% Edited: 05/05/2026, 10:24
 
 
 % Set inputs if required
@@ -61,7 +61,7 @@ if strcmp(type,'MBC')
     X1 = zeros(size(Y1,1),C);
     for j = 1:C, X1(x==j,j) = 1; end;
 elseif strcmp(type,'MBR')
-    X1 = [x, ones(size(x))];
+    X1 = [ones(size(x)), x];
 else
     warning('mbitrain:invalid_type', 'Analysis type is invalid (must be "MBC" or "MBR")!');
 end;
@@ -70,9 +70,9 @@ P1 = inv(V);
 
 % Get data dimensions
 %-------------------------------------------------------------------------%
-n = size(Y1,1);
-v = size(Y1,2);
-p = size(X1,2);
+n  = size(Y1,1);
+v  = size(Y1,2);
+p  = size(X1,2);
 
 % Specify prior parameters
 %-------------------------------------------------------------------------%
