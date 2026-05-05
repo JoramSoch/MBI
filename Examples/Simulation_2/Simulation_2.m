@@ -5,12 +5,12 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/02/2022, 15:02: first version
-% - 30/05/2022, 05:14: minor changes
-% - 17/02/2025, 15:25: added decision boundaries
-% - 19/02/2025, 11:49: aligned with Python
-% - 30/01/2026, 17:32: recorded analysis time
-% - 12/02/2026, 17:45: included covariate as feature
+% - 2022-02-20, 15:02: first version
+% - 2022-05-30, 05:14: minor changes
+% - 2025-02-17, 15:25: added decision boundaries
+% - 2025-02-19, 11:49: aligned with Python
+% - 2026-01-30, 17:32: recorded analysis time
+% - 2026-02-12, 17:45: included covariate as feature
 
 
 clear

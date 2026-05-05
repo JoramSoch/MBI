@@ -5,12 +5,12 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/02/2022, 15:55: first version
-% - 30/05/2022, 05:22: minor changes
-% - 05/02/2022, 13:10: scaled linear RGB for better visualization
-% - 17/02/2025, 12:24: linear RGB to sRGB for better visualization
-% - 20/02/2025, 14:57: aligned with Python
-% - 30/01/2026, 17:41: recorded analysis time
+% - 2022-02-20, 15:55: first version
+% - 2022-05-30, 05:22: minor changes
+% - 2022-02-05, 13:10: scaled linear RGB for better visualization
+% - 2025-02-17, 12:24: linear RGB to sRGB for better visualization
+% - 2025-02-20, 14:57: aligned with Python
+% - 2026-01-30, 17:41: recorded analysis time
 
 
 clear

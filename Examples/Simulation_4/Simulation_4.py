@@ -7,11 +7,11 @@ Author: Joram Soch, OvGU Magdeburg
 E-Mail: joram.soch@ovgu.de
 
 Version History:
-- 20/02/2022, 22:38: first version in MATLAB
-- 21/04/2022, 15:55: ported code to Python
-- 06/07/2022, 16:21: modified MBI import
-- 20/02/2025, 17:44: added results visualization
-- 05/03/2025, 11:00: added to GitHub repository
+- 2022-02-20, 22:38: first version in MATLAB
+- 2022-04-21, 15:55: ported code to Python
+- 2022-07-06, 16:21: modified MBI import
+- 2025-02-20, 17:44: added results visualization
+- 2025-03-05, 11:00: added to GitHub repository
 """
 
 

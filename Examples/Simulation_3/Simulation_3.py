@@ -7,10 +7,10 @@ Author: Joram Soch, OvGU Magdeburg
 E-Mail: joram.soch@ovgu.de
 
 Version History:
-- 20/02/2022, 12:23: first version in MATLAB
-- 19/02/2025, 16:38: ported code to Python (Steps 1 & 2)
-- 20/02/2025, 15:02: ported code to Python (Steps 2 & 3)
-- 05/03/2025, 10:58: added to GitHub repository
+- 2022-02-20, 12:23: first version in MATLAB
+- 2025-02-19, 16:38: ported code to Python (Steps 1 & 2)
+- 2025-02-20, 15:02: ported code to Python (Steps 2 & 3)
+- 2025-03-05, 10:58: added to GitHub repository
 """
 
 

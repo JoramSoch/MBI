@@ -5,10 +5,10 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 21/02/2022, 00:41: first version
-% - 21/02/2022, 17:18: minor changes
-% - 25/02/2025, 14:28: aligned with Python
-% - 11/02/2026, 16:43: recorded analysis time
+% - 2022-02-21, 00:41: first version
+% - 2022-02-21, 17:18: minor changes
+% - 2025-02-25, 14:28: aligned with Python
+% - 2026-02-11, 16:43: recorded analysis time
 
 
 clear

@@ -5,11 +5,11 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 21/02/2022, 01:45: first data analysis
-% - 28/02/2025, 18:06: final figure display
-% - 26/02/2026, 17:13: rewrote for multiple analyses
-% - 26/02/2026, 17:28: added MBR, GNB, LinReg, SVR, RFR, NNR
-% - 12/03/2026, 16:32: implemented RGA, changed bar colors
+% - 2022-02-21, 01:45: first data analysis
+% - 2025-02-28, 18:06: final figure display
+% - 2026-02-26, 17:13: rewrote for multiple analyses
+% - 2026-02-26, 17:28: added MBR, GNB, LinReg, SVR, RFR, NNR
+% - 2026-03-12, 16:32: implemented RGA, changed bar colors
 
 
 clear

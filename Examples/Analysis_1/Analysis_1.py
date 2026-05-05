@@ -7,12 +7,12 @@ Author: Joram Soch, OvGU Magdeburg
 E-Mail: joram.soch@ovgu.de
 
 Version History:
-- 21/02/2022, 00:41: first version in MATLAB
-- 25/02/2025, 16:14: ported code to Python (Step 1 & 2)
-- 26/02/2025, 11:18: ported code to Python (Step 3)
-- 05/03/2025, 11:01: added to GitHub repository
-- 05/03/2025, 15:21: recoded confusion matrix
-- 05/03/2025, 18:38: unified tick font sizes
+- 2022-02-21, 00:41: first version in MATLAB
+- 2025-02-25, 16:14: ported code to Python (Step 1 & 2)
+- 2025-02-26, 11:18: ported code to Python (Step 3)
+- 2025-03-05, 11:01: added to GitHub repository
+- 2025-03-05, 15:21: recoded confusion matrix
+- 2025-03-05, 18:38: unified tick font sizes
 """
 
 

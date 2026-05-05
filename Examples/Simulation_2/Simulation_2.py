@@ -7,11 +7,11 @@ Author: Joram Soch, OvGU Magdeburg
 E-Mail: joram.soch@ovgu.de
 
 Version History:
-- 20/02/2022, 12:23: first version in MATLAB
-- 19/02/2025, 12:38: ported code to Python
-- 19/02/2025, 16:03: edited plotting details
-- 20/02/2025, 13:49: changed to linear SVC with C=1
-- 05/03/2025, 10:56: added to GitHub repository
+- 2022-02-20, 12:23: first version in MATLAB
+- 2025-02-19, 12:38: ported code to Python
+- 2025-02-19, 16:03: edited plotting details
+- 2025-02-20, 13:49: changed to linear SVC with C=1
+- 2025-03-05, 10:56: added to GitHub repository
 """
 
 

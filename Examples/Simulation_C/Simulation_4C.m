@@ -5,15 +5,15 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/02/2022, 22:38: first MATLAB version
-% - 20/02/2025, 16:48: final MATLAB version
-% - 26/02/2026, 13:02: added performance plot
-% - 26/02/2026, 14:02: rewrote MBR and SVR
-% - 26/02/2026, 14:32: added LinReg, RFR, NNR
-% - 26/02/2026, 15:32: added GNB regression
-% - 26/02/2026, 15:44: refined performance plot
-% - 12/03/2026, 16:18: implemented RGA measure
-% - 12/03/2026, 16:23: changed bar color scheme
+% - 2022-02-20, 22:38: first MATLAB version
+% - 2025-02-20, 16:48: final MATLAB version
+% - 2026-02-26, 13:02: added performance plot
+% - 2026-02-26, 14:02: rewrote MBR and SVR
+% - 2026-02-26, 14:32: added LinReg, RFR, NNR
+% - 2026-02-26, 15:32: added GNB regression
+% - 2026-02-26, 15:44: refined performance plot
+% - 2026-03-12, 16:18: implemented RGA measure
+% - 2026-03-12, 16:23: changed bar color scheme
 
 
 clear

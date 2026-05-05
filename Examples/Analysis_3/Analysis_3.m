@@ -5,11 +5,11 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 21/02/2022, 19:10: first version
-% - 30/05/2022, 05:33: minor changes
-% - 27/02/2025, 11:27: aligned with Python
-% - 11/02/2026, 16:59: recorded analysis time
-% - 12/02/2026, 17:16: rewrote SVM analysis code,
+% - 2022-02-21, 19:10: first version
+% - 2022-05-30, 05:33: minor changes
+% - 2025-02-27, 11:27: aligned with Python
+% - 2026-02-11, 16:59: recorded analysis time
+% - 2026-02-12, 17:16: rewrote SVM analysis code,
 %                      included weight samples by class size,
 %                      included use covariates as features
 

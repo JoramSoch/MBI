@@ -5,13 +5,13 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/12/2024, 17:46: first data analysis
-% - 26/02/2025, 16:04: final figure display
-% - 26/02/2026, 16:03: rewrote for multiple analyses
-% - 26/02/2026, 16:29: added MBC, GNB, LDA, LogReg, SVC, RFC, NNC
-% - 26/02/2026, 16:34: restricted to data subsets
-% - 26/02/2026, 16:45: remove features for GNB
-% - 12/03/2026, 18:30: implemented RGA, changed bar colors
+% - 2024-12-20, 17:46: first data analysis
+% - 2025-02-26, 16:04: final figure display
+% - 2026-02-26, 16:03: rewrote for multiple analyses
+% - 2026-02-26, 16:29: added MBC, GNB, LDA, LogReg, SVC, RFC, NNC
+% - 2026-02-26, 16:34: restricted to data subsets
+% - 2026-02-26, 16:45: remove features for GNB
+% - 2026-03-12, 18:30: implemented RGA, changed bar colors
 
 
 clear

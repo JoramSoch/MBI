@@ -5,13 +5,13 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/02/2022, 12:23: first version
-% - 07/07/2023, 21:17: minor changes
-% - 17/02/2025, 14:13: reversed order for mu,
+% - 2022-02-20, 12:23: first version
+% - 2023-07-07, 21:17: minor changes
+% - 2025-02-17, 14:13: reversed order for mu,
 %                      corrected CA for s2,
 %                      modified colormap
-% - 18/02/2025, 16:29: aligned with Python
-% - 30/01/2026, 17:18: recorded analysis time
+% - 2025-02-18, 16:29: aligned with Python
+% - 2026-01-30, 17:18: recorded analysis time
 
 
 clear

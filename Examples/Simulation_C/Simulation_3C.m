@@ -5,18 +5,18 @@
 % E-Mail: joram.soch@ovgu.de
 % 
 % Version History:
-% - 20/02/2022, 15:55: first MATLAB version
-% - 20/02/2025, 14:57: final MATLAB version
-% - 26/02/2026, 10:57: added performance plot
-% - 26/02/2026, 11:08: rewrote MBC and SVC
-% - 26/02/2026, 11:21: added LDA classification
-% - 26/02/2026, 11:32: added GNB classification
-% - 26/02/2026, 11:43: added LogReg classification
-% - 26/02/2026, 12:01: added RF classification
-% - 26/02/2026, 12:15: added NN classification
-% - 26/02/2026, 12:44: refined performance plot
-% - 12/03/2026, 15:42: implemented RGA measure
-% - 12/03/2026, 15:51: changed bar color scheme
+% - 2022-02-20, 15:55: first MATLAB version
+% - 2025-02-20, 14:57: final MATLAB version
+% - 2026-02-26, 10:57: added performance plot
+% - 2026-02-26, 11:08: rewrote MBC and SVC
+% - 2026-02-26, 11:21: added LDA classification
+% - 2026-02-26, 11:32: added GNB classification
+% - 2026-02-26, 11:43: added LogReg classification
+% - 2026-02-26, 12:01: added RF classification
+% - 2026-02-26, 12:15: added NN classification
+% - 2026-02-26, 12:44: refined performance plot
+% - 2026-03-12, 15:42: implemented RGA measure
+% - 2026-03-12, 15:51: changed bar color scheme
 
 
 clear
