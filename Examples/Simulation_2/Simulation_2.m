@@ -11,6 +11,7 @@
 % - 2025-02-19, 11:49: aligned with Python
 % - 2026-01-30, 17:32: recorded analysis time
 % - 2026-02-12, 17:45: included covariate as feature
+% - 2026-05-13, 14:15: removed calls to "ML_SVC"
 
 
 clear
@@ -30,8 +31,8 @@ v  = 2;                         % number of features
 C  = 2;                         % number of classes
 
 % generate classes
-x = [kron([1:C]',ones(n/C,1)), rand(n,1)];
-x = sortrows(x,2);
+x  = [kron([1:C]',ones(n/C,1)), rand(n,1)];
+x  = sortrows(x,2);
 x  = x(:,1);                    % randomized labels
 X  = zeros(n,C);                % design matrix
 V  = eye(n);                    % observation covariance
@@ -40,10 +41,10 @@ for i = 1:n
 end;
 
 % generate covariate
-c = 1.5*rand(n,1)-0.75;         % c ~ U(-0.75, +0.75)
+c  = 1.5*rand(n,1)-0.75;        % c ~ U(-0.75, +0.75)
 c(x==1) = c(x==1) + 0.25;       % x=1 -> -1 < c < 0.5
 c(x==2) = c(x==2) - 0.25;       % x=2 -> -0.5 < c < 1
-X = [X, c];                     % complete design matrix
+X  = [X, c];                    % complete design matrix
 
 % specify SVM analyses
 SVMs={'without', 'regression', 'feature'};
@@ -82,22 +83,54 @@ MBC(2) = ML_MBI(Y, x, c, V, CV, 'MBC', []);
 tA2    = toc;
 
 % Analysis 3: SVM w/o covariate
-tic;
-SVC(1) = ML_SVC(x, Y, CV, 1, 1, 0);
-tB1    = toc;
-
 % Analysis 4: SVM with prior regression
-if p == 2, tic; end;
-Xc     = [c, ones(size(c))];
-Yr     = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
-SVC(2) = ML_SVC(x, Yr, CV, 1, 1, 0);
-if p == 2, tB2 = toc; end;
-
 % Analysis 5: SVM with covariate as feature
-if p == 3, tic; end;
-Yc     = [Y, c];
-SVC(3) = ML_SVC(x, Yc, CV, 1, 1, 0);
-if p == 3, tB2 = toc; end;
+for i = 1:numel(SVMs)
+
+    % Option 1: use original data
+    if i == 1, Yi = Y;  end;
+    % Option 2: orrect data for covariate
+    Xc = [c, ones(size(c))];
+    Yr = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
+    if i == 2, Yi = Yr; end;
+    % Option 3: use covariate as features
+    Yc = [Y, c];
+    if i == 3, Yi = Yc; end;
+
+    % perform cross-validation
+    tic;
+    xt = x;
+    xp = zeros(size(xt));
+    for g = 1:size(CV,2)
+        % get training and test set
+        i1  = find(CV(:,g)==1);
+        i2  = find(CV(:,g)==2);
+        Y1g = Yi(i1,:);
+        Y2g = Yi(i2,:);
+        x1g = xt(i1);
+        x2g = xt(i2);
+        opt = sprintf('-s 0 -t 0 -c %s -q', num2str(C));
+        % train and test using SVC
+        svm1   = svmtrain(x1g, Y1g, opt);
+        xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');
+    end;
+
+    % store SVM results
+    SVC(i).pred.xt  = xt;
+    SVC(i).pred.xp  = xp;
+    SVC(i).perf.CA  = mean(xp==xt);
+    SVC(i).perf.CAs = zeros(C,1);
+    SVC(i).perf.CM  = zeros(C,C);
+    for j = 1:C
+        SVC(i).perf.CAs(j)  = mean(xp(xt==j)==j);
+        SVC(i).perf.CM(:,j) = ...
+            mean( repmat(xp(xt==j),[1,C])==repmat([1:C],[sum(xt==j),1]) )';
+    end;
+    SVC(i).perf.BA  = mean(SVC(i).perf.CAs);
+    if i == 1, tB1 = toc; end;
+    if i == p, tB2 = toc; end;
+
+end;
 
 % Analysis 1: decision boundary
 MBA = mbitrain(Y, x, [], V, 'MBC');
@@ -204,7 +237,7 @@ plot(Y_SVC(:,1), Y_SVC(:,2), '-k', 'Color', 0.5*[1,1,1], 'LineWidth', 1);
 axis([-lim, +lim, -lim, +lim]);
 axis square;
 set(gca,'Box','On');
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(1).perf.DA*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(1).perf.CA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
@@ -220,7 +253,7 @@ plot(Y_SVC(:,1), Y_SVC(:,2), '-k', 'Color', 0.5*[1,1,1], 'LineWidth', 1);
 axis([-lim, +lim, -lim, +lim]);
 axis square;
 set(gca,'Box','On');
-text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(p).perf.DA*100), ...
+text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(p).perf.CA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);

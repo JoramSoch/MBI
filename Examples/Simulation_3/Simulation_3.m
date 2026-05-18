@@ -11,6 +11,7 @@
 % - 2025-02-17, 12:24: linear RGB to sRGB for better visualization
 % - 2025-02-20, 14:57: aligned with Python
 % - 2026-01-30, 17:41: recorded analysis time
+% - 2026-05-13, 14:35: removed calls to "ML_SVC"
 
 
 clear
@@ -66,13 +67,40 @@ tA  = toc;
 tAp = tA;
 
 % Analysis 2: SVC
-SVC = ML_SVC(x, Y, CV, 1, 1, 0);
+xt  = x;
+xp  = zeros(size(xt));
+for g = 1:size(CV,2)
+    % get training and test set
+    i1  = find(CV(:,g)==1);
+    i2  = find(CV(:,g)==2);
+    Y1g = Y(i1,:);
+    Y2g = Y(i2,:);
+    x1g = x(i1);
+    x2g = x(i2);
+    opt = sprintf('-s 0 -t 0 -c %s -q', num2str(C));
+    % train and test using SVC
+    svm1   = svmtrain(x1g, Y1g, opt);
+    xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');
+end;
+% store SVM results
+SVC.pred.xt  = xt;
+SVC.pred.xp  = xp;
+SVC.perf.CA  = mean(xp==xt);
+SVC.perf.CAs = zeros(C,1);
+SVC.perf.CM  = zeros(C,C);
+for j = 1:C
+    SVC.perf.CAs(j)  = mean(xp(xt==j)==j);
+    SVC.perf.CM(:,j) = ...
+        mean( repmat(xp(xt==j),[1,C])==repmat([1:C],[sum(xt==j),1]) )';
+end;
+SVC.perf.BA  = mean(SVC.perf.CAs);
+% store trained SVM
 tic;
 SVM = svmtrain(x, Y, '-s 0 -t 0 -c 1 -q');
 tB  = toc;
 
 % Analysis 1: priors
-CA  = [MBC.perf.CA, SVC.perf.DA];
+CA  = [MBC.perf.CA, SVC.perf.CA];
 CAp = zeros(1,C);
 for k = 1:C
     prior.x    = [1:C];
@@ -86,7 +114,7 @@ end;
 PP  = zeros(numel(xy),numel(xy),3);
 Xp  = zeros(numel(xy),numel(xy),3);
 PPp = zeros(numel(xy),numel(xy),3,C);
-fprintf('-> Prediction grid:');
+fprintf('\n-> Prediction grid:');
 for i = 1:numel(xy)
     % specify test data
     if mod(i,10) == 1

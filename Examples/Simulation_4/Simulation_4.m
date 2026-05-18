@@ -8,6 +8,7 @@
 % - 2022-02-20, 22:38: first version
 % - 2025-02-20, 16:48: aligned with Python
 % - 2026-01-30, 17:44: recorded analysis time
+% - 2026-05-13, 18:22: removed calls to "ML_SVC"
 
 
 clear
@@ -59,7 +60,30 @@ tA      = toc;
 
 % Analysis 2: SVM
 tic;
-SVR = ML_SVR(x, Y, CV, 1, 1);
+C   = 1;
+xt  = x;
+xp  = zeros(size(xt));
+for g = 1:size(CV,2)
+    % get training and test set
+    i1  = find(CV(:,g)==1);
+    i2  = find(CV(:,g)==2);
+    Y1g = Y(i1,:);
+    Y2g = Y(i2,:);
+    x1g = x(i1);
+    x2g = x(i2);
+    opt = sprintf('-s 4 -t 0 -c %s -q', num2str(C));
+    % train and test using SVR
+    svm1   = svmtrain(x1g, Y1g, opt);
+    xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');
+end;
+% store SVM results
+SVR.pred.xt  = xt;
+SVR.pred.xp  = xp;
+SVR.perf.r   = corr(xp, xt);
+SVR.perf.R2  = SVR.perf.r^2;
+SVR.perf.MAE = mean(abs(xp-xt));
+SVR.perf.MSE = mean((xp-xt).^2);
+SVR.perf.mn  = polyfit(xt, xp, 1);
 tB  = toc;
 
 % store analysis time
