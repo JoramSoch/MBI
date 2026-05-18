@@ -9,6 +9,7 @@
 % - 2022-02-21, 17:18: minor changes
 % - 2025-02-25, 14:28: aligned with Python
 % - 2026-02-11, 16:43: recorded analysis time
+% - 2026-05-18, 14:49: removed calls to "ML_SVC"
 
 
 clear
@@ -63,7 +64,36 @@ tA = toc;
 % Analyses 2: SVM
 tic;
 for h = 1:numel(it)
-    SVC(h) = ML_SVC(xt{h}, Y(it{h},:), CV(it{h},:), 1, 1, 0);
+    % perform cross-validation
+    Yh  = Y(it{h},:);
+    xp  = zeros(size(xt{h}));
+    Ch  = numel(iC{h});
+    CVh = CV(it{h},:);
+    for g = 1:size(CVh,2)
+        % get training and test set
+        i1  = find(CVh(:,g)==1);
+        i2  = find(CVh(:,g)==2);
+        Y1g = Yh(i1,:);
+        Y2g = Yh(i2,:);
+        x1g = xt{h}(i1);
+        x2g = xt{h}(i2);
+        opt = sprintf('-s 0 -t 0 -c %s -q', num2str(1));
+        % train and test using SVC
+        svm1   = svmtrain(x1g, Y1g, opt);
+        xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');
+    end;
+    % store SVM results
+    SVC(h).pred.xt  = xt{h};
+    SVC(h).pred.xp  = xp;
+    SVC(h).perf.CA  = mean(xp==xt{h});
+    SVC(h).perf.CAs = zeros(Ch,1);
+    SVC(h).perf.CM  = zeros(Ch,Ch);
+    for j = 1:Ch
+        SVC(h).perf.CAs(j)  = mean(xp(xt{h}==j)==j);
+        SVC(h).perf.CM(:,j) = ...
+            mean( repmat(xp(xt{h}==j),[1,Ch])==repmat([1:Ch],[sum(xt{h}==j),1]) )';
+    end;
+    SVC(h).perf.BA  = mean(SVC(h).perf.CAs);
 end;
 tB = toc;
 
@@ -115,7 +145,7 @@ for h = 1:numel(xt)
         colormap(cmap);
         colorbar;
         axis ij;
-        set(gca,'XTick',[1:nC(h)],'XTickLabel',labs(iC{h}));
+        set(gca,'XTick',[1:nC(h)],'XTickLabel',labs(iC{h}),'XTickLabelRotation',0);
         set(gca,'YTick',[1:nC(h)],'YTickLabel',labs(iC{h}));
         xlabel('true class', 'FontSize', 12);
         ylabel('predicted class', 'FontSize', 12);
@@ -127,7 +157,7 @@ for h = 1:numel(xt)
             end;
         end;
         if g == 1, CA(g,h) = MBC(h).perf.CA; end;
-        if g == 2, CA(g,h) = SVC(h).perf.DA; end;
+        if g == 2, CA(g,h) = SVC(h).perf.CA; end;
     end;
 end;
 

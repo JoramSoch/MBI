@@ -8,7 +8,7 @@
 % - 2022-02-20, 22:38: first version
 % - 2025-02-20, 16:48: aligned with Python
 % - 2026-01-30, 17:44: recorded analysis time
-% - 2026-05-13, 18:22: removed calls to "ML_SVC"
+% - 2026-05-13, 18:22: removed calls to "ML_SVR"
 
 
 clear
@@ -60,7 +60,6 @@ tA      = toc;
 
 % Analysis 2: SVM
 tic;
-C   = 1;
 xt  = x;
 xp  = zeros(size(xt));
 for g = 1:size(CV,2)
@@ -71,7 +70,7 @@ for g = 1:size(CV,2)
     Y2g = Y(i2,:);
     x1g = x(i1);
     x2g = x(i2);
-    opt = sprintf('-s 4 -t 0 -c %s -q', num2str(C));
+    opt = sprintf('-s 4 -t 0 -c %s -q', num2str(1));
     % train and test using SVR
     svm1   = svmtrain(x1g, Y1g, opt);
     xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');

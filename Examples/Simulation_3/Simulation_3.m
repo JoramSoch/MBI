@@ -77,7 +77,7 @@ for g = 1:size(CV,2)
     Y2g = Y(i2,:);
     x1g = x(i1);
     x2g = x(i2);
-    opt = sprintf('-s 0 -t 0 -c %s -q', num2str(C));
+    opt = sprintf('-s 0 -t 0 -c %s -q', num2str(1));
     % train and test using SVC
     svm1   = svmtrain(x1g, Y1g, opt);
     xp(i2) = svmpredict(x2g, Y2g, svm1, '-q');
