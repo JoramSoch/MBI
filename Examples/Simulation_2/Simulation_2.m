@@ -12,6 +12,7 @@
 % - 2026-01-30, 17:32: recorded analysis time
 % - 2026-02-12, 17:45: included covariate as feature
 % - 2026-05-13, 14:15: removed calls to "ML_SVC"
+% - 2026-06-13, 19:03: aligned with Python
 
 
 clear
@@ -62,8 +63,10 @@ B = [-mu, +mu;
 E = matnrnd(zeros(n,v), s2*V, Si, 1);
 Y = X*B + E;
 
-% specify cross-validation
-CV = ML_CV(x, k, 'kfc');
+% correct data for covariate
+Xc = [c, ones(size(c))];
+Yr = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
+Yc = [Y, c];
 
 % prepare decision boundary
 lim = 6;
@@ -71,6 +74,9 @@ dxy = 0.05;
 Y2a = [-lim*ones((2*lim)/dxy+1,1), [-lim:dxy:+lim]'];
 Y2b = [+lim*ones((2*lim)/dxy+1,1), [-lim:dxy:+lim]'];
 x2  = [1, 2*ones(1,size(Y2a,1)-1)]';
+
+% specify cross-validation
+CV = ML_CV(x, k, 'kfc');
 
 % Analysis 1: MBC w/o covariate
 tic;
@@ -89,12 +95,9 @@ for i = 1:numel(SVMs)
 
     % Option 1: use original data
     if i == 1, Yi = Y;  end;
-    % Option 2: orrect data for covariate
-    Xc = [c, ones(size(c))];
-    Yr = (eye(n) - Xc*(Xc'*Xc)^(-1)*Xc')*Y;
+    % Option 2: correct data for covariate
     if i == 2, Yi = Yr; end;
     % Option 3: use covariate as features
-    Yc = [Y, c];
     if i == 3, Yi = Yc; end;
 
     % perform cross-validation
@@ -243,7 +246,7 @@ xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
 title('SVC w/o correction', 'FontSize', 16);
 
-% plot MBC with prior regression
+% plot SVC with prior regression
 subplot(2,3,6); hold on;
 plot(Y(x==1 & SVC(p).pred.xp==1,1), Y(x==1 & SVC(p).pred.xp==1,2), '.r', 'MarkerSize', 10);
 plot(Y(x==2 & SVC(p).pred.xp==1,1), Y(x==2 & SVC(p).pred.xp==1,2), 'sr', 'MarkerSize', 1, 'LineWidth', 2);
@@ -257,5 +260,6 @@ text(+(9/10)*lim, -(9/10)*lim, sprintf('CA = %2.2f %%', SVC(p).perf.CA*100), ...
      'HorizontalAlignment', 'Right', 'VerticalAlignment', 'Bottom');
 xlabel('feature 1', 'FontSize', 12);
 ylabel('feature 2', 'FontSize', 12);
+if p == 1, title('SVC w/o correction',            'FontSize', 16); end;
 if p == 2, title('SVC with prior regression',     'FontSize', 16); end;
 if p == 3, title('SVC with covariate as feature', 'FontSize', 16); end;

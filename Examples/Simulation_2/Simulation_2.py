@@ -12,6 +12,7 @@ Version History:
 - 2025-02-19, 16:03: edited plotting details
 - 2025-02-20, 13:49: changed to linear SVC with C=1
 - 2025-03-05, 10:56: added to GitHub repository
+- 2026-06-13, 19:10: included covariate as feature
 """
 
 
@@ -59,6 +60,11 @@ c[x==1] = c[x==1] + 0.25                    # x=1 -> -1 < c < 0.5
 c[x==2] = c[x==2] - 0.25                    # x=2 -> -0.5 < c < 1
 X  = np.c_[X, c]                            # complete design matrix
 
+# specify SVM analyses
+SVMs=['without', 'regression', 'feature']   # SVM variants
+Stp = 'regression'                          # SVM to plot
+p   = SVMs.index(Stp)                       # index of SVM
+
 
 ### Step 2: generate & analyze the data #######################################
 
@@ -69,12 +75,10 @@ B = np.array([[-mu, +mu],
 E = MBI.matnrnd(np.zeros((n,v)), s2*V, Si, 1)
 Y = X @ B + E
 
-# preallocate results
-MBC = [None for h in range(2)]
-SVC = [None for h in range(2)]
-Xp  = [None for h in range(2)]
-CA  = np.zeros((2,2))
-la  = np.logical_and
+# correct data for covariate
+Xc = np.c_[c, np.ones((n,1))]
+Yr = (np.eye(n) - Xc @ np.linalg.inv(Xc.T @ Xc) @ Xc.T) @ Y
+Yc = np.c_[Y, c]
 
 # prepare decision boundary
 lim = 6
@@ -83,6 +87,12 @@ n2  = int((2*lim)/dxy)+1
 Y2a = np.c_[-lim*np.ones((n2,1)), np.linspace(-lim, +lim, n2)]
 Y2b = np.c_[+lim*np.ones((n2,1)), np.linspace(-lim, +lim, n2)]
 x2  = np.concatenate((np.array([1]), 2*np.ones(n2-1)))
+
+# preallocate results
+MBC = [None for h in range(2)]
+Xp  = [None for h in range(len(SVMs))]
+CA  = np.zeros((len(SVMs),2))
+la  = np.logical_and
 
 # Analysis 1: MBC w/o covariate
 MBC[0]  = MBI.cvMBI(Y, x, V=V, mb_type='MBC')
@@ -95,36 +105,40 @@ MBC[1]  = MBI.cvMBI(Y, x, X=c, V=V, mb_type='MBC')
 MBC[1].crossval(k=k, cv_mode='kfc')
 MBC[1].predict()
 CA[1,0] = MBC[1].evaluate('CA')
+CA[2,0] = np.nan
 
 # Analysis 3: SVM w/o covariate
 # Analysis 4: SVM with prior regression
-Xc  = np.c_[c, np.ones((n,1))]
-Yr  = (np.eye(n) - Xc @ np.linalg.inv(Xc.T @ Xc) @ Xc.T) @ Y
-xp3 = np.zeros(n)
-xp4 = np.zeros(n)
-for g in range(k):
-    # get training and test set
-    i1  = np.array(np.nonzero(MBC[0].CV[:,g]==1)[0], dtype=int)
-    i2  = np.array(np.nonzero(MBC[0].CV[:,g]==2)[0], dtype=int)
-    Y1  = Y[i1,:]
-    Y2  = Y[i2,:]
-    Yr1 = Yr[i1,:]
-    Yr2 = Yr[i2,:]
-    x1  = x[i1]
-    # train and test using SVC w/o covariate
-    SVC[0]  = svm.SVC(kernel='linear', C=1)
-    SVC[0].fit(Y1, x1)
-    xp3[i2] = SVC[0].predict(Y2)
-    # train and test using SVC with prior regression
-    SVC[1]  = svm.LinearSVC(C=1)
-    SVC[1].fit(Yr1, x1)
-    xp4[i2] = SVC[1].predict(Yr2)
-del i1, i2, Y1, Y2, Yr1, Yr2, x1
-Xp[0]   = xp3
-Xp[1]   = xp4
-CA[0,1] = np.mean(xp3==x)
-CA[1,1] = np.mean(xp4==x)
-del xp3, xp4
+# Analysis 5: SVM with covariate as feature
+for i in range(len(SVMs)):
+    
+    # Option 1: use original data
+    if i == 0: Yi = Y
+    # Option 2: correct data for covariate
+    if i == 1: Yi = Yr
+    # Option 3: use covariate as features
+    if i == 2: Yi = Yc
+    
+    # perform cross-validation
+    xp = np.zeros(n)
+    for g in range(k):
+        # get training and test set
+        i1  = np.array(np.nonzero(MBC[0].CV[:,g]==1)[0], dtype=int)
+        i2  = np.array(np.nonzero(MBC[0].CV[:,g]==2)[0], dtype=int)
+        Y1g = Yi[i1,:]
+        Y2g = Yi[i2,:]
+        x1g = x[i1]
+        # train and test using SVC
+        SVC    = svm.SVC(kernel='linear', C=1)
+        SVC.fit(Y1g, x1g)
+        xp[i2] = SVC.predict(Y2g)
+    
+    # store SVM results
+    Xp[i]   = xp
+    CA[i,1] = np.mean(xp==x)
+    
+# delete analysis variables
+del Yi, xp, Y1g, Y2g, x1g
 
 # Analysis 1: decision boundary
 MBA   = MBI.model(Y, x, V=V, mb_type='MBC').train()
@@ -248,13 +262,13 @@ axs[0,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[0,1]*100),
               fontsize=12, ha='right', va='bottom')
 
 # plot SVC with prior regression
-axs[1,2].plot(Y[la(x==1, Xp[1]==1),0], Y[la(x==1, Xp[1]==1),1], '.r',
+axs[1,2].plot(Y[la(x==1, Xp[p]==1),0], Y[la(x==1, Xp[p]==1),1], '.r',
               markersize=5, label='class 1, predicted 1')
-axs[1,2].plot(Y[la(x==2, Xp[1]==1),0], Y[la(x==2, Xp[1]==1),1], 'sr',
+axs[1,2].plot(Y[la(x==2, Xp[p]==1),0], Y[la(x==2, Xp[p]==1),1], 'sr',
               markersize=2, linewidth=2, label='class 2, predicted 1')
-axs[1,2].plot(Y[la(x==1, Xp[1]==2),0], Y[la(x==1, Xp[1]==2),1], '.b',
+axs[1,2].plot(Y[la(x==1, Xp[p]==2),0], Y[la(x==1, Xp[p]==2),1], '.b',
               markersize=5, label='class 1, predicted 2')
-axs[1,2].plot(Y[la(x==2, Xp[1]==2),0], Y[la(x==2, Xp[1]==2),1], 'sb',
+axs[1,2].plot(Y[la(x==2, Xp[p]==2),0], Y[la(x==2, Xp[p]==2),1], 'sb',
               markersize=2, linewidth=2, label='class 2, predicted 2')
 axs[1,2].plot(Y_SVC[:,0], Y_SVC[:,1], '-',
               color=(0.5,0.5,0.5), linewidth=1)
@@ -262,9 +276,14 @@ axs[1,2].axis([-lim, +lim, -lim, +lim])
 axs[1,2].set_aspect('equal', adjustable='box')
 axs[1,2].set_xlabel('feature 1', fontsize=16)
 axs[1,2].set_ylabel('feature 2', fontsize=16)
-axs[1,2].set_title('SVC with prior regression', fontsize=20, fontweight='bold')
+if p == 0:
+    axs[1,2].set_title('SVC w/o correction', fontsize=20, fontweight='bold')
+elif p == 1:
+    axs[1,2].set_title('SVC with prior regression', fontsize=20, fontweight='bold')
+elif p == 2:
+    axs[1,2].set_title('SVC with covariate as feature', fontsize=20, fontweight='bold')
 axs[1,2].tick_params(axis='both', labelsize=12)
-axs[1,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[1,1]*100),
+axs[1,2].text(+(9/10)*lim, -(9/10)*lim, 'CA = {:2.2f} %'.format(CA[p,1]*100),
               fontsize=12, ha='right', va='bottom')
 
 # enable tight layout

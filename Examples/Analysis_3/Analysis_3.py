@@ -153,16 +153,12 @@ for h in range(len(xt)):
             xph[i2] = SVC.predict(Y2g)
         
         # store SVM results
+        xp[h][i]    = xph
         if i == p:
             CAs     = np.array([np.mean(xph[xh==j]==j) for j in range(1,Ch+1)])
             BA[1,h] = np.mean(CAs)
-        # CMh      = np.array([[np.mean(xph[xh==j1]==j2) 
-        #                       for j1 in range(1,Ch+1)]
-        #                       for j2 in range(1,Ch+1)])
-        # CM[h][i] = CMh
-        xp[h][i] = xph
 
-# delete analysis variables     
+# delete analysis variables
 del Yi, xh, xph, Ch, Y1g, Y2g, x1g, cwh, CAs
 
 
