@@ -13,6 +13,9 @@ Version History:
 - 2025-03-05, 11:03: added to GitHub repository
 - 2025-03-05, 15:23: recoded confusion matrix
 - 2025-03-05, 18:40: unified tick font sizes
+- 2026-06-13, 15:47: rewrote SVM analysis code,
+                     included weight samples by class size,
+                     included use covariates as features
 """
 
 
@@ -36,35 +39,40 @@ os.chdir(orig_dir)
 
 ### Step 1: load data #########################################################
 
-# load TSV file
+# load CSV file
 filename = 'Birth_Weights.csv'
-data = pd.read_csv(filename, sep=',')
-hdr  = list(data)                           # column names
+data     = pd.read_csv(filename, sep=',')
+hdr      = list(data)                       # column names
 
 # extract data
-Y = np.array(data[['Birth_weight','Weight']])# data matrix
-X = np.zeros((Y.shape[0],5))                # design matrix
+Y      = np.array(data[['Birth_weight','Weight']])
+X      = np.zeros((Y.shape[0],5))           # data and design matrix
 X[:,0] = 1*(data['Smoker']=='no') + 2*(data['Smoker']=='yes')
 X[:,1] = 1*(data['Race']=='white') + 2*(data['Race']=='black') + 3*(data['Race']=='other')
 X[:,2] = 1*(data['Hypertension']=='no') + 2*(data['Hypertension']=='yes')
 X[:,3] = data['Age']
 X[:,4] = data['Visits']
-n = Y.shape[0]                              # number of data points
-v = Y.shape[1]                              # number of features
+n      = Y.shape[0]                         # number of data points
+v      = Y.shape[1]                         # number of features
 
 
 ### Step 2: analyze data ######################################################
 
-# specify parameters
-k = 10                                      # number of CV folds
-V = np.eye(n)                               # observation covariance
+# specify SVM analyses
+SVMs=['original', 'features', 'weighted']   # SVM variants
+Stp = 'original'                            # SVM to plot
+C   = 1                                     # SVM cost parameter
+
+# specify cross-validation
+k   = 10                                    # number of CV folds
+V   = np.eye(n)                             # observation covariance
 
 # preallocate results
 xt  = [X[:,0], X[:,1], X[:,2]]
 MBC = [None for h in range(len(xt))]
 SVC = [None for h in range(len(xt))]
-BA  = np.zeros((2,len(xt)))
 nC  = [int(np.max(x)) for x in xt]
+BA  = np.zeros((2,len(xt)))
 
 # Analysis 1: classify smoker, (not) accounting for others
 x1  = X[:,0]
@@ -94,32 +102,68 @@ X3  = np.c_[1*(X[:,0]==1)-1*(X[:,0]==2),
 X3r = np.c_[X3, np.ones((n,1))]
 Y3r = (np.eye(n) - X3r @ np.linalg.inv(X3r.T @ X3r) @ X3r.T) @ Y
 MBC[2]  = MBI.cvMBI(Y, x3, X=X3, V=V, mb_type='MBC')
-MBC[2].crossval(k=k, cv_mode='kfc')
+MBC[2].crossval(k=6, cv_mode='kfc')
 MBC[2].predict()
 BA[0,2] = MBC[2].evaluate('BA')
 
 # Analyses 1-3: support vector classifications
+p   = SVMs.index(Stp)
+Ys  = [Y,   Y,   Y  ]
+Xs  = [X1,  X2,  X3 ]
 Yr  = [Y1r, Y2r, Y3r]
-xp  = [None for h in range(len(xt))]
+CVs = [MBC[0].CV, MBC[1].CV, MBC[2].CV]
+xp  = [[None for i in range(len(SVMs))] for h in range(len(xt))]
+CM  = [[None for i in range(len(SVMs))] for h in range(len(xt))]
+
+# analyze data sets
 for h in range(len(xt)):
-    Yh  = Yr[h]
-    xh  = xt[h]
-    xph = np.zeros(xt[h].size)
-    for g in range(k):
-        # get training and test set
-        i1  = np.array(np.nonzero(MBC[h].CV[:,g]==1)[0], dtype=int)
-        i2  = np.array(np.nonzero(MBC[h].CV[:,g]==2)[0], dtype=int)
-        Y1  = Yh[i1,:]
-        Y2  = Yh[i2,:]
-        x1  = xh[i1]
-        # train and test using SVC
-        SVC = svm.SVC(kernel='linear', C=1)
-        SVC.fit(Y1, x1)
-        xph[i2] = SVC.predict(Y2)
-    xp[h]   = xph
-    CAs     = np.array([np.mean(xph[xh==j+1]==j+1) for j in range(nC[h])])
-    BA[1,h] = np.mean(CAs)
-del Yh, xh, xph, SVC, CAs
+    
+    # get label values
+    xh = xt[h]
+    Ch = int(np.max(xh))
+    
+    # run SVM analyses
+    for i in range(len(SVMs)):
+
+        # Option 1: correct data for covariates
+        if i == 0 or i == 2: Yi = Yr[h]
+        # Option 2: use covariates as features
+        if i == 1:           Yi = np.c_[Ys[h], Xs[h]]
+
+        # perform cross-validation
+        CVh = CVs[h]
+        xph = np.zeros(xt[h].size)
+        for g in range(CVh.shape[1]):
+            # get training and test set
+            i1  = np.array(np.nonzero(CVh[:,g]==1)[0], dtype=int)
+            i2  = np.array(np.nonzero(CVh[:,g]==2)[0], dtype=int)
+            Y1g = Yi[i1,:]
+            Y2g = Yi[i2,:]
+            x1g = xh[i1]
+            # Option 3: weight samples by class size
+            if i == 2:
+                cwh = {}
+                for j in range(Ch):
+                    cwh[j+1] = (1/Ch)*(i1.size/np.sum(x1g==j+1))
+            else:
+                cwh = None
+            # train and test using SVC
+            SVC     = svm.SVC(kernel='linear', C=C, class_weight=cwh)
+            SVC.fit(Y1g, x1g)
+            xph[i2] = SVC.predict(Y2g)
+        
+        # store SVM results
+        if i == p:
+            CAs     = np.array([np.mean(xph[xh==j]==j) for j in range(1,Ch+1)])
+            BA[1,h] = np.mean(CAs)
+        # CMh      = np.array([[np.mean(xph[xh==j1]==j2) 
+        #                       for j1 in range(1,Ch+1)]
+        #                       for j2 in range(1,Ch+1)])
+        # CM[h][i] = CMh
+        xp[h][i] = xph
+
+# delete analysis variables     
+del Yi, xh, xph, Ch, Y1g, Y2g, x1g, cwh, CAs
 
 
 ### Step 3: visualize results #################################################
@@ -191,7 +235,7 @@ for h in range(len(xt)):
         if g == 0:
             CM = MBC[h].evaluate('CM')
         if g == 1:
-            CM = np.array([[np.mean(xp[h][xt[h]==j1]==j2)
+            CM = np.array([[np.mean(xp[h][p][xt[h]==j1]==j2)
                             for j1 in range(1,nC[h]+1)]
                             for j2 in range(1,nC[h]+1)])
         if nC[h] == 2:

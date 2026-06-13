@@ -445,7 +445,7 @@ class cvMBI:
             nf = np.ceil(nc/k)
             ia = np.arange(0,n)
             for g in range(k):
-                i2 = np.empty(1, dtype=int)
+                i2 = np.array([], dtype=int)
                 for j in range(C):
                     ij = np.arange(g*nf[j], np.min([(g+1)*nf[j], nc[j]]), dtype=int)
                     i2 = np.append(i2, ic[j][ij])

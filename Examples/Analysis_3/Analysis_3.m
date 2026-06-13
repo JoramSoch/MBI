@@ -12,6 +12,7 @@
 % - 2026-02-12, 17:16: rewrote SVM analysis code,
 %                      included weight samples by class size,
 %                      included use covariates as features
+% - 2026-06-13, 14:52: aligned with Python
 
 
 clear
@@ -21,21 +22,21 @@ close all
 
 % load CSV file
 filename = 'Birth_Weights.csv';
-fid = fopen(filename);
-raw = textscan(fid,'%f%f%d%s%s%s%d','HeaderLines',1,'Delimiter',',');
-hdr = {'birth weight','mother''s weight','mother''s age','smoker','ethnicity','hypertension','visits to the doctor'};
+fid      = fopen(filename);
+raw      = textscan(fid,'%f%f%d%s%s%s%d','HeaderLines',1,'Delimiter',',');
+hdr      = {'birth weight','mother''s weight','mother''s age','smoker','ethnicity','hypertension','visits to the doctor'};
 fclose(fid);
 
 % extract data
-Y = [raw{1}, raw{2}];           % data matrix
-X = zeros(size(Y,1),5);         % design matrix
+Y      = [raw{1}, raw{2}];      % data matrix
+X      = zeros(size(Y,1),5);    % design matrix
 X(:,1) = 1*strcmp(raw{4},'"no"') + 2*strcmp(raw{4},'"yes"');
 X(:,2) = 1*strcmp(raw{5},'"white"') + 2*strcmp(raw{5},'"black"') + 3*strcmp(raw{5},'"other"');
 X(:,3) = 1*strcmp(raw{6},'"no"') + 2*strcmp(raw{6},'"yes"');
 X(:,4) = raw{3};
 X(:,5) = raw{7};
-n = size(Y,1);                  % number of data points
-v = size(Y,2);                  % number of features
+n      = size(Y,1);             % number of data points
+v      = size(Y,2);             % number of features
 
 
 %%% Step 2: analyze data %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -94,9 +95,9 @@ for h = 1:numel(Yr)
     for i = 1:numel(SVMs)
 
         % Option 1: correct data for covariates
-        if i == 1 || i == 3, Yi = Yr{h};                    end;
+        if i == 1 || i == 3, Yi = Yr{h};         end;
         % Option 2: use covariates as features
-        if i == 2,           Yi =[Ys{h}, Xs{h}(:,1:end-1)]; end;
+        if i == 2,           Yi =[Ys{h}, Xs{h}]; end;
 
         % perform cross-validation
         if i == p, tic; end;
