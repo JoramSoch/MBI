@@ -53,6 +53,7 @@ Version History:
 - 2025-03-05, 18:28: enabled sparse covariance matrix
 - 2025-03-05, 19:03: replaced double quotation marks
 - 2026-05-05, 11:35: changed order of regressors for MBR
+- 2026-06-16, 19:55: added calc_RGA, documentation
 """
 
 
@@ -140,6 +141,83 @@ def uniprior(x_type='disc', L=100, x_min=0, x_max=1):
     
     # return uniform prior
     return prior
+
+# function: rank graduation accuracy
+#-----------------------------------------------------------------------------#
+def calc_RGA(x, xs, mode=None):
+    """
+    Rank Graduation Accuracy as Unified Measure of Predictive Performance
+    RGA = calc_RGA(x, xs, mode)
+    
+        x    - an n x 1 vector of binary class labels (0, 1) or
+               an n x 1 vector of multiple class labels (1, 2, 3 etc.) or
+               an n x 1 vector of regression target values (real-valued)
+        xs   - an n x 1 vector of predictor scores (decision values) or
+               an n x C matrix of predictor scores (one-vs-rest decisions)
+        mode - a string indicating the averaging method for n-ary
+               classification ('RGA', 'macro' or 'weighted')
+    
+        RGA  - a scalar, the rank graduation accuracy (0 <= RGA <= 1) [1]
+    
+    RGA = calc_RGA(x, xs, mode) computes the rank graduation accuracy [1] for
+    the task of predicting labels x using decision values xs (e.g. SVM score
+    values) and applying the averaging method mode, if the task is one of
+    multi-class classification.
+    
+    The predictors scores xs can be, for example,
+    - Bayesian posterior probabilities p(x_i=j|y_i)
+    - logistic regression linear predictors
+    - random forest class probabilities
+    - SVM decision function values
+    - gradient boosting scores, etc.
+    
+    References:
+    [1] Giudici P, Raffinetti E (2025): "RGA: a unified measure of predictive
+        accuracy". Advances in Data Analysis and Classification, vol. 19,
+        iss. 1, pp. 67-93.
+    """
+    
+    # set default values
+    if mode is None:
+        if len(xs.shape) == 1:
+            mode = 'RGA'
+        else:
+            if xs.shape[1] == 1:
+                mode = 'RGA'
+            else:
+                mode = 'weighted'
+    
+    # get data dimensions
+    n = x.size                              # number of data points
+    i = np.array(range(n)) + 1              # data point indices
+    if len(xs.shape) == 1: C = 1            # number of classes
+    else:                  C = xs.shape[1]
+    
+    # calculate RGA measure
+    if C == 1:                              # regression or binary classification
+        # obtain ranks
+        r  = np.argsort(x,  0)
+        rs = np.argsort(xs, 0)
+        # compute RGA
+        RGA = (np.sum(i * x[rs]) - np.sum(i * x[r[n-i]])) / \
+              (np.sum(i * x[r])  - np.sum(i * x[r[n-i]]))
+    else:                                   # multi-class classification
+        # compute class-wise RGAs
+        RGA = np.zeros(C)
+        w   = np.zeros(C)
+        for j in range(C):
+            xj     = 1*(x==j+1) + 0*(x!=j+1)
+            xsj    = xs[:,j]
+            RGA[j] = calc_RGA(xj, xsj, 'RGA')
+            w[j]   = np.sum(xj)/n
+        # average class-wise RGAs
+        if mode == 'macro':
+            RGA = np.mean(RGA)
+        elif mode == 'weighted':
+            RGA = np.sum(w * RGA)
+    
+    # return RGA measure
+    return RGA
 
 
 ###############################################################################
@@ -565,7 +643,7 @@ class cvMBI:
                    o 'MSE' - mean squared error
                    o 'mn'  - slope and intercept
             
-            perf - a scalar, the predictive performance of the model
+            perf - scalar, vector or matrix; predictive performance of the model
             
         Each performance measure is calculated by comparing true labels with
         predicted labels (see MBI.cvMBI.predict) according to the measure.

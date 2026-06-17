@@ -37,7 +37,7 @@ function RGA = ML_RGA(x, xs, mode)
 % - 2025-03-12, 11:32: first version
 
 
-% Set defaults values
+% Set default values
 %-------------------------------------------------------------------------%
 if nargin < 3 || isempty(mode)
     if size(xs,2) == 1
