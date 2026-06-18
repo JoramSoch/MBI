@@ -94,8 +94,8 @@ RGA = np.zeros(M)
 for g in range(k):
 
     # get training and test set
-    i1 = np.array(np.nonzero(MBC.CV[:,g]==1)[0], dtype=int)
-    i2 = np.array(np.nonzero(MBC.CV[:,g]==2)[0], dtype=int)
+    i1 = np.array(np.nonzero(CV[:,g]==1)[0], dtype=int)
+    i2 = np.array(np.nonzero(CV[:,g]==2)[0], dtype=int)
     Y1 = Y[i1,:]
     Y2 = Y[i2,:]
     x1 = x[i1]
@@ -105,10 +105,6 @@ for g in range(k):
     
     # evaluate all methods
     for h in range(M):
-        
-        # prepare test set predictions
-        xp2  = np.zeros(i2.size)
-        xs2  = 1/C*np.ones((i2.size,C))
         
         # Method: multivariate Bayesian classification (MBI)
         # https://github.com/JoramSoch/MBI/blob/main/Python/MBI.py
@@ -167,7 +163,7 @@ for g in range(k):
         xs[i2,:,h] = xs2
         
     # delete analysis variables  
-    del mba1, pp2, gnb1, lda1, svm1
+    del mba1, pp2, gnb1, lda1, svm1, rf1, nn1
 
 # calculate performance
 for h in range(M):
