@@ -12,6 +12,7 @@
 % - 2026-02-26, 16:34: restricted to data subsets
 % - 2026-02-26, 16:45: remove features for GNB
 % - 2026-03-12, 18:30: implemented RGA, changed bar colors
+% - 2026-06-19, 14:46: corrected calculation of RGA
 
 
 clear
@@ -51,6 +52,7 @@ N2 = 10000;                     % test data points to use
 % preallocate results
 M   = numel(meth);
 xp  = zeros(N2,M);
+xs  = zeros(N2,C,M);
 CA  = zeros( 1,M);
 RGA = zeros( 1,M);
 
@@ -168,13 +170,14 @@ for h = 1:M
     end;
     
     % calculate performance
-    xp(:,h) = xp2;
-    CA(h)   = mean(xp(:,h)==x2(1:N2));
-    RGA(h)  = ML_RGA(x2(1:N2), xp(:,h), 'macro');
-
+    xp(:,h)   = xp2;
+    xs(:,:,h) = xs2; 
+    CA(h)     = mean(xp(:,h)==x2(1:N2));
+    RGA(h)    = ML_RGA(x2(1:N2), xs(:,:,h), 'macro');
+    
 end;
 fprintf('\n\n');
-clear mba1 nbc1 lda1 logreg1 svm1 rfe1 nn1
+clear mba1 Y1h x1h Y1v nbc1 lda1 logreg1 svm1 rfe1 nn1
 
 
 %%% Step 3: visualize results %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,7 +192,7 @@ cols  = [  0,  32,  96;
          255, 192,   0;
          255, 255,   0];
 x_off = 3;
-y_off = 0.96;
+y_off = 0.9;
 hold on;
 
 % plot performance
@@ -205,25 +208,7 @@ legend([meth, {'chance'}], 'Location', 'SouthEast');
 xlabel('classification approach', 'FontSize', 16);
 ylabel('rank graduation accuracy', 'FontSize', 16);
 title('Analysis 2', 'FontSize', 24);
-text(x_off+1/2, y_off, sprintf('generative methods '), ...
+text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
-text(x_off+1/2, y_off, sprintf(' discriminative methods'), ...
+text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
-
-% plot performance
-% for h = 1:M
-%     bar(h, CA(h), 0.7, 'FaceColor', cols(h,:)./255);
-% end;
-% plot([(1-1), (M+1)], [1/C, 1/C], ':k', 'LineWidth', 2);
-% plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
-% axis([(1-1), (M+1), 0, 1]);
-% set(gca,'Box','On');
-% set(gca,'XTick',[1:M],'XTickLabel',meth);
-% legend([meth, {'chance'}], 'Location', 'Best');
-% xlabel('classification approach', 'FontSize', 16);
-% ylabel('classification accuracy', 'FontSize', 16);
-% title('Analysis 2: Comparison', 'FontSize', 24);
-% text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
-%      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
-% text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
-%      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');

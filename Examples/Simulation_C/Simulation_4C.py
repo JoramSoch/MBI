@@ -202,7 +202,7 @@ cols  = [[  0,  32,  96], [  0,   0, 255],
 # plot performance
 for h in range(M):
     col = tuple([rgb/255 for rgb in cols[h]])
-    ax.bar(h+1, RGA[h], width= 0.7, color=col, edgecolor='k', label=meth[h])
+    ax.bar(h+1, RGA[h], width=0.7, color=col, edgecolor='k', label=meth[h])
 ax.plot([(1-1), (M+2)], [1/2, 1/2],     ':k', linewidth=2, label='chance')
 ax.plot([x_off+1/2, x_off+1/2], [0, 1], '-k', linewidth=1)
 ax.axis([(1-1), (M+2), 0, 1])
