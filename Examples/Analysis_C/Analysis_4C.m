@@ -171,21 +171,3 @@ text(x_off+1/2, y_off, sprintf('generative methods '), ...
      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
 text(x_off+1/2, y_off, sprintf(' discriminative methods'), ...
      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
-
-% plot performance
-% for h = 1:M
-%     bar(h, r(h), 0.7, 'FaceColor', cols(h,:)./255);
-% end;
-% plot([(1-1), (M+2)], [0, 0], ':k', 'LineWidth', 2);
-% plot([x_off, x_off]+1/2, [0, 1], '-k', 'LineWidth', 1);
-% axis([(1-1), (M+2), 0, 1]);
-% set(gca,'Box','On');
-% set(gca,'XTick',[1:M],'XTickLabel',meth);
-% legend([meth, {'chance'}], 'Location', 'NorthEast');
-% xlabel('regression approach', 'FontSize', 16);
-% ylabel('predictive correlation', 'FontSize', 16);
-% title('Analysis 4: Comparison', 'FontSize', 24);
-% text(x_off+1/2, y_off, sprintf('generative   \nmethods   '), ...
-%      'FontSize', 16, 'HorizontalAlignment', 'right', 'VerticalAlignment', 'middle');
-% text(x_off+1/2, y_off, sprintf('   discriminative\n   methods'), ...
-%      'FontSize', 16, 'HorizontalAlignment', 'left', 'VerticalAlignment', 'middle');
